@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clojure Racing Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="client.js"></script>
+</head>
+<body>
+<h1>Clojure Multiplayer Racing Game</h1>
+
+<div id="info-panel">
+    <h3>Game Info</h3>
+    <div>Connected: <span id="connection-status">Disconnected</span></div>
+    <div>Players: <span id="player-count">0</span></div>
+    <div class="player-list" id="players-list"></div>
+</div>
+
+<div id="game-container">
+    <canvas id="game-canvas" width="800" height="600"></canvas>
+</div>
+
+<div id="controls">
+    <h3>Controls</h3>
+    <p>
+        <span class="control-key">W</span> - Accelerate
+        <span class="control-key">S</span> - Brake/Reverse
+        <span class="control-key">A</span> - Turn Left
+        <span class="control-key">D</span> - Turn Right
+    </p>
+</div>
+</body>
+</html>
