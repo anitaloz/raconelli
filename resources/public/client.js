@@ -1,8 +1,8 @@
 // ГЛАВНЫЙ КЛАСС КЛИЕНТА
 class RacingGameClient {
 
-    constructor() {
-        this.playerId = Math.random(100000000000 + 1).toString();
+    constructor(playerId) {
+        this.playerId = playerId;
         this.ws = null;    // вебсокет соединение
         this.gameState = { players: {}, gameTime: 0 };  // состояние игры
         this.keys = {};    // состояние нажатых клавиш
@@ -41,7 +41,6 @@ class RacingGameClient {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         // формируем URL WebSocket соединения
         const wsUrl = `${protocol}//${window.location.host}/ws`;
-
         // новое WebSocket соединение
         this.ws = new WebSocket(wsUrl);
 
@@ -202,7 +201,7 @@ class RacingGameClient {
             // - Укороченный ID игрока (первые 8 символов)
             playerElement.innerHTML = `
                         <div class="player-color" style="background-color: ${player.color}"></div>
-                        Player ${player.id.substring(0, 8)}
+                        Player ${player.id}
                     `;
 
             // добавляем элемент в список
@@ -223,5 +222,10 @@ class RacingGameClient {
 
 // запуск игры после загрузки страницы
 window.addEventListener('load', () => {
-    new RacingGameClient();
+
+    var pid = (Math.random(100)).toString();
+
+    console.log(pid);
+
+    new RacingGameClient(pid);
 });

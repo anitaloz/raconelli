@@ -11,22 +11,27 @@
 ;; создание WebSocket обработчика
 (defn create-websocket-handler []
   ;; возвращаем функцию-обработчик для HTTP запросов
+  ;; request - http запрос от клиента
   (fn [request]
     ;; with-channel создает WebSocket соединение
     (server/with-channel request channel
+                         ;; выполняется при успешном создании вебсокета
                          (println "Client connected")
 
-                         ;; генерируем уникальный ID для игрока
-                         (let [player-id (str (java.util.UUID/randomUUID))]
-                           ;; добавляем нового игрока в игру
-                           (game-state/add-player! player-id channel)
+                         ;; volatile! объект для изменяемых значений (для однопоточного доступа)
+                         ;; нам подходит потому что вебсокеты обрабатываются в своих потоках (вроде как)
+                         (let [player-id (volatile! nil)]
 
                            ;; обработчик закрытия соединения
+                           ;; должен срабатывать если закрыта вкладка/закрыто соединение/отключился интернет
                            (server/on-close channel
                                             (fn [status]
-                                              (println "Client disconnected:" player-id)
+                                              (println "Client disconnected")
                                               ;; удаляем игрока из игры
-                                              (game-state/remove-player! player-id)))
+                                              (when-let [pid @player-id] ;; выполнится если айди не nil
+                                                (game-state/remove-player! pid))
+                                            )
+                           )
 
                            ;; обработчик входящих сообщений
                            (server/on-receive channel
@@ -36,8 +41,18 @@
                                                   (let [message (json/read-str data :key-fn keyword)]
                                                     ;; обрабатываем в зависимости от типа сообщения
                                                     (case (:type message)
+
+                                                      "player-id" ;; отправка айди с клиента
+                                                      ( let [client-id (:playerId message)]
+                                                        ;; сохраняем айди в общую переменную
+                                                       (vreset! player-id client-id) ;;  изменяем значение volatile
+                                                       (println "new id:" client-id)
+                                                       ;; добавление игрока
+                                                       (game-state/add-player! client-id channel)
+                                                      )
+
                                                       "player-input" ;; ввод игрока
-                                                      (handle-player-input player-id (:input message))
+                                                      (handle-player-input (:playerId message) (:input message))
 
                                                       "ping"  ;; ping-запрос
                                                       (server/send! channel (json/write-str {:type "pong"}))
@@ -47,4 +62,8 @@
 
                                                   ;; обработка ошибок парсинга
                                                   (catch Exception e
-                                                    (println "Error processing message from" player-id ":" e)))))))))
+                                                    (println "Error processing message " e)))))
+                         )
+    )
+  )
+)
