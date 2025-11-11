@@ -2,6 +2,7 @@
 class RacingGameClient {
 
     constructor() {
+        this.playerId = Math.random(100000000000 + 1).toString();
         this.ws = null;    // вебсокет соединение
         this.gameState = { players: {}, gameTime: 0 };  // состояние игры
         this.keys = {};    // состояние нажатых клавиш
@@ -35,6 +36,7 @@ class RacingGameClient {
 
     // подключение к WebSocket серверу
     connect() {
+
         // определяем протокол (ws:// или wss://) в зависимости от текущего протокола страницы
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         // формируем URL WebSocket соединения
@@ -49,6 +51,12 @@ class RacingGameClient {
 
             // обновляем статус подключения в UI
             document.getElementById('connection-status').textContent = 'Connected';
+
+            // отправляем сообщение на сервер в формате JSON
+            this.ws.send(JSON.stringify({
+                type: 'player-id',   // тип сообщения
+                playerId: this.playerId
+            }));
         };
 
         // обработчик закрытия соединения
@@ -101,6 +109,7 @@ class RacingGameClient {
             // отправляем сообщение на сервер в формате JSON
             this.ws.send(JSON.stringify({
                 type: 'player-input',   // тип сообщения
+                playerId: this.playerId,
                 input: input
             }));
             // обработка в вебсокет хэндлере в r.web_socket
