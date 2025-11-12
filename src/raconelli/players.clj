@@ -4,9 +4,10 @@
   {:id id            ; уникальный идентификатор игрока
    :x 100            ; начальная позиция по X
    :y 100            ; начальная позиция по Y
-   :velocity-x 0     ; скорость по оси X
-   :velocity-y 0     ; скорость по оси Y
-   :angle 0          ; угол поворота игрока
+   :speed 0
+   :angle 0  ; угол поворота игрока
+   :hp 10
+   :car (rand-nth ["red_bull", "mercedes", "ferrari", "zauber"])
    :color (rand-nth ["#FF0000" "#00FF00" "#0000FF" "#FFFF00" "#FF00FF" "#00FFFF"])
    :last-update (System/currentTimeMillis)  ; время последнего обновления (в мс)
    :name (str "Player-" (subs id 0 6))})    ; имя игрока = "Player-" + первые 6 символов ID

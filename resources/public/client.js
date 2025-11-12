@@ -8,13 +8,35 @@ class RacingGameClient {
         this.keys = {};    // состояние нажатых клавиш
         this.canvas = document.getElementById('game-canvas');      // html канвас элемент
         this.ctx = this.canvas.getContext('2d');                   // 2д контекст для рисования на канвас
-
+        this.carImages=new Map()
+        this.trackImage=null
+        this.onTrack = true
         // вызов методов инициализации (все функции ниже)
         this.setupEventListeners();  // настройка обработчиков событий
         this.connect();              // подключение к серверу
         this.gameLoop();             // запуск игрового цикла
+        // Предзагрузка изображений машинок
+        this.preloadCarImages();
     }
 
+    preloadCarImages() {
+        var trackImg=new Image()
+        trackImg.src=`track.jpg`
+        this.trackImage=trackImg
+        const carTypes = ['zauber', 'mercedes', 'ferrari', 'red_bull']; // Добавьте нужные типы машинок
+
+        carTypes.forEach(carType => {
+            const img = new Image();
+            img.src = `/cars/${carType}.png`;
+            img.onload = () => {
+                console.log(`Car image ${carType} loaded`);
+                this.carImages.set(carType, img);
+            };
+            img.onerror = () => {
+                console.error(`Failed to load car image: ${carType}`);
+            };
+        });
+    }
     // настройка обработчиков событий клавиатуры
     setupEventListeners() {
         // обработчик нажатия клавиш
@@ -104,7 +126,6 @@ class RacingGameClient {
                 left: this.keys['a'] || false,
                 right: this.keys['d'] || false
             };
-
             // отправляем сообщение на сервер в формате JSON
             this.ws.send(JSON.stringify({
                 type: 'player-input',   // тип сообщения
@@ -112,6 +133,38 @@ class RacingGameClient {
                 input: input
             }));
             // обработка в вебсокет хэндлере в r.web_socket
+        }
+    }
+
+    drawCarWithImage(ctx, player) {
+        var carType = player.car || 'ferrari'
+        if (this.carImages.has(carType)) {
+            const carImage = this.carImages.get(carType);
+            ctx.save();
+            ctx.translate(player.x, player.y);
+            ctx.rotate(player.angle * Math.PI / 180);
+
+            const carWidth = 40;
+            const carHeight = 20;
+            ctx.drawImage(carImage, -carWidth/2, -carHeight/2, carWidth, carHeight);
+
+            ctx.restore();
+        } else {
+            // Если изображение еще не загружено, используем fallback
+            this.drawCar(ctx, player);
+
+            // Пытаемся загрузить изображение если еще не начали
+            if (!this.carImages.has(carType)) {
+                const img = new Image();
+                img.src = `/cars/${carType}.png`;
+                img.onload = () => {
+                    console.log(`Car image ${carType} loaded`);
+                    this.carImages.set(carType, img);
+                };
+                img.onerror = () => {
+                    console.error(`Failed to load car image: ${carType}`);
+                };
+            }
         }
     }
 
@@ -145,24 +198,45 @@ class RacingGameClient {
         ctx.restore();
     }
 
-    // отрисовка гоночного трека
+
     drawTrack(ctx) {
+        if (this.trackImage && this.trackImage.complete) {
+            ctx.drawImage(this.trackImage, 0, 0, this.canvas.width, this.canvas.height);
+        } else {
+            // fallback, если изображение ещё не загружено
+            ctx.fillStyle = "#27ae60";
+            ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+    }
 
-       // границы трека
-        ctx.strokeStyle = '#8B4513';
-        ctx.lineWidth = 40;
-        ctx.strokeRect(0, 0, 800, 600);
+    sendOnTrack() {
+        // проверяем что соединение открыто и готово к отправке
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            // формируем объект ввода на основе нажатых клавиш
+            const onTrack = {
+                onTrack: this.onTrack
+            };
 
-        // трек
-        ctx.fillStyle = '#7f8c8d';
-        ctx.fillRect(20, 20, 760, 560);
+            // отправляем сообщение на сервер в формате JSON
+            this.ws.send(JSON.stringify({
+                type: 'player-onTrack',   // тип сообщения
+                playerId: this.playerId,
+                input: onTrack
+            }));
+            // обработка в вебсокет хэндлере в r.web_socket
+        }
+    }
 
-        // центральная разделительная линия
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([10, 10]);
-        ctx.strokeRect(40, 40, 720, 520);
-        ctx.setLineDash([]);
+    checkBoundaries(ctx, player) {
+
+        const imageData = ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+        const data = imageData.data;
+        const pixel=this.ctx.getImageData(player.x, player.y, 1,1).data
+        const [r,g,b]=pixel
+        if (r !== 42 || g!==47 || b!==45) {
+            this.onTrack=false
+                //console.log(pixel)
+        }
     }
 
     // основной метод отрисовки игры
@@ -173,11 +247,11 @@ class RacingGameClient {
 
         // отрисовка трека (функция выше)
         this.drawTrack(this.ctx);
-
         // отрисовка всех игроков (для каждого игрока из геймстейта вызывается функция отрисовки)
         // Object.values() преобразует объект players в массив значений
         Object.values(this.gameState.players).forEach(player => {
-            this.drawCar(this.ctx, player);
+            this.drawCarWithImage(this.ctx, player);
+            this.checkBoundaries(this.ctx, player)
         });
     }
 
