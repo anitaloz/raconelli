@@ -8,6 +8,10 @@
 (defn handle-player-input [player-id input-data]
   (game-state/update-player! player-id #(physics/handle-player-input % input-data)))
 
+;; проверка уникальности ID
+;(defn is-id-unique [player-id]
+;  (not (contains? (game-state/get-players) player-id)))
+
 ;; создание WebSocket обработчика
 (defn create-websocket-handler []
   ;; возвращаем функцию-обработчик для HTTP запросов
@@ -43,12 +47,36 @@
                                                     (case (:type message)
 
                                                       "player-id" ;; отправка айди с клиента
-                                                      ( let [client-id (:playerId message)]
-                                                        ;; сохраняем айди в общую переменную
-                                                       (vreset! player-id client-id) ;;  изменяем значение volatile
-                                                       (println "new id:" client-id)
-                                                       ;; добавление игрока
-                                                       (game-state/add-player! client-id channel)
+                                                      ( let [client-id (:playerId message) ;; полученный айди
+                                                             existing-players (game-state/get-players)] ;; все игроки на серве
+
+                                                        (println "join attempt:" client-id)
+
+                                                        ;; проверка на уникальность
+                                                        (if (contains? existing-players client-id)
+
+                                                          ;; айди не уникальный
+                                                          (do (println "id already in use: " client-id)
+                                                              (server/send! channel (json/write-str
+                                                                   {:type "join-error"
+                                                                    :error "Player ID already taken"})))
+
+                                                          ;; айди уникальный
+                                                          (do
+                                                            (println "id is unique:" client-id)
+                                                            (vreset! player-id client-id)
+                                                            (game-state/add-player! client-id channel)
+                                                            (server/send! channel (json/write-str
+                                                                                    {:type "join-success"
+                                                                                     :message "Connected successfully"}))
+                                                            )
+                                                          )
+
+                                                        ; сохраняем айди в общую переменную
+                                                       ;(vreset! player-id client-id) ;;  изменяем значение volatile
+                                                       ;(println "new id:" client-id)
+                                                       ;;; добавление игрока
+                                                       ;(game-state/add-player! client-id channel)
                                                       )
 
                                                       "player-input" ;; ввод игрока

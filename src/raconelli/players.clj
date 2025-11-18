@@ -10,7 +10,7 @@
    :car (rand-nth ["red_bull", "mercedes", "ferrari", "zauber"])
    :color (rand-nth ["#FF0000" "#00FF00" "#0000FF" "#FFFF00" "#FF00FF" "#00FFFF"])
    :last-update (System/currentTimeMillis)  ; время последнего обновления (в мс)
-   :name (str "Player-" (subs id 0 6))})    ; имя игрока = "Player-" + первые 6 символов ID
+   :name (str "Racer-" id )})    ; имя игрока = "Player-" + первые 6 символов ID
 
 (defn get-player-color [player-id players]
   "Функция получения цвета игрока"

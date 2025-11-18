@@ -1,20 +1,24 @@
 // ГЛАВНЫЙ КЛАСС КЛИЕНТА
 class RacingGameClient {
 
-    constructor(playerId) {
-        this.playerId = playerId;
+    constructor() {
+        this.playerId = (Math.random(100)).toString();
         this.ws = null;    // вебсокет соединение
         this.gameState = { players: {}, gameTime: 0 };  // состояние игры
         this.keys = {};    // состояние нажатых клавиш
         this.canvas = document.getElementById('game-canvas');      // html канвас элемент
         this.ctx = this.canvas.getContext('2d');                   // 2д контекст для рисования на канвас
-        this.carImages=new Map()
-        this.trackImage=null
+        this.carImages = new Map()
+        this.trackImage = null
         this.onTrack = true
+        this.isConnected = false;
+
         // вызов методов инициализации (все функции ниже)
         this.setupEventListeners();  // настройка обработчиков событий
-        this.connect();              // подключение к серверу
-        this.gameLoop();             // запуск игрового цикла
+
+//        this.connect();              // подключение к серверу
+//        this.gameLoop();             // запуск игрового цикла
+
         // Предзагрузка изображений машинок
         this.preloadCarImages();
     }
@@ -37,6 +41,7 @@ class RacingGameClient {
             };
         });
     }
+
     // настройка обработчиков событий клавиатуры
     setupEventListeners() {
         // обработчик нажатия клавиш
@@ -49,10 +54,34 @@ class RacingGameClient {
 
         // обработчик отпускания клавиш
         document.addEventListener('keyup', (e) => {
-            this.keys[e.key.toLowerCase()] = false;   // false = нажата (состояние клавиши)
+            this.keys[e.key.toLowerCase()] = false;   // false = не нажата (состояние клавиши)
 
             // отправляем текущий ввод на сервер
             this.sendInput();
+        });
+
+        // получение и отправка айди
+        const idForm = document.getElementById('id-input-btn');
+        idForm.addEventListener('click', () => {
+
+            //idForm.disabled = true;
+
+            const idInput = document.getElementById('id-input').value;
+
+            console.log('id:', idInput);
+
+            const number = Number(idInput);
+
+            if (idInput === '' ||  isNaN(number) || !Number.isInteger(number) || number < 1 || number > 99){
+                console.log("id check error");
+                //idForm.disabled = false;
+            }
+            else {
+                console.log("id check success");
+                this.playerId = idInput;
+                this.connect();
+            }
+
         });
     }
 
@@ -69,6 +98,8 @@ class RacingGameClient {
         // обработчик успешного подключения
         this.ws.onopen = () => {
             console.log('Connected to server');
+
+            console.log("playerId:",this.playerId);
 
             // обновляем статус подключения в UI
             document.getElementById('connection-status').textContent = 'Connected';
@@ -88,7 +119,7 @@ class RacingGameClient {
             document.getElementById('connection-status').textContent = 'Disconnected';
 
             // попытка переподключения через 3 секунды
-            setTimeout(() => this.connect(), 3000);
+            // setTimeout(() => this.connect(), 3000);
         };
 
         // обработчик входящих сообщений от сервера
@@ -103,6 +134,21 @@ class RacingGameClient {
                     this.gameState = message.state;
                     // обновляем UI
                     this.updateUI();
+                }
+                else if ( message.type === 'join-success') {
+                    console.log('Join successful:', message.message);
+                    this.isConnected = true;
+
+                    document.getElementById('user-input-id').style.display = "none";
+
+                    this.gameLoop();
+
+                }
+                else if ( message.type === 'join-error') {
+                    console.error("join error:", message.error)
+                    this.isConnected = false;
+
+                    this.ws.close();
                 }
             } catch (e) {
                 console.error('Error parsing message:', e);
@@ -297,9 +343,9 @@ class RacingGameClient {
 // запуск игры после загрузки страницы
 window.addEventListener('load', () => {
 
-    var pid = (Math.random(100)).toString();
+//    var pid = (Math.random(100)).toString();
+//
+//    console.log(pid);
 
-    console.log(pid);
-
-    new RacingGameClient(pid);
+    new RacingGameClient();
 });
