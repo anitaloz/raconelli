@@ -209,35 +209,35 @@ class RacingGameClient {
         }
     }
 
-    sendOnTrack() {
-        // проверяем что соединение открыто и готово к отправке
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            // формируем объект ввода на основе нажатых клавиш
-            const onTrack = {
-                onTrack: this.onTrack
-            };
-
-            // отправляем сообщение на сервер в формате JSON
-            this.ws.send(JSON.stringify({
-                type: 'player-onTrack',   // тип сообщения
-                playerId: this.playerId,
-                input: onTrack
-            }));
-            // обработка в вебсокет хэндлере в r.web_socket
-        }
-    }
-
-    checkBoundaries(ctx, player) {
-
-        const imageData = ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-        const data = imageData.data;
-        const pixel=this.ctx.getImageData(player.x, player.y, 1,1).data
-        const [r,g,b]=pixel
-        if (r !== 42 || g!==47 || b!==45) {
-            this.onTrack=false
-                //console.log(pixel)
-        }
-    }
+    // sendOnTrack() {
+    //     // проверяем что соединение открыто и готово к отправке
+    //     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+    //         // формируем объект ввода на основе нажатых клавиш
+    //         const onTrack = {
+    //             onTrack: this.onTrack
+    //         };
+    //
+    //         // отправляем сообщение на сервер в формате JSON
+    //         this.ws.send(JSON.stringify({
+    //             type: 'player-onTrack',   // тип сообщения
+    //             playerId: this.playerId,
+    //             input: onTrack
+    //         }));
+    //         // обработка в вебсокет хэндлере в r.web_socket
+    //     }
+    // }
+    //
+    // checkBoundaries(ctx, player) {
+    //
+    //     const imageData = ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+    //     const data = imageData.data;
+    //     const pixel=this.ctx.getImageData(player.x, player.y, 1,1).data
+    //     const [r,g,b]=pixel
+    //     if (r !== 42 || g!==47 || b!==45) {
+    //         this.onTrack=false
+    //             //console.log(pixel)
+    //     }
+    // }
 
     // основной метод отрисовки игры
     render() {
@@ -251,7 +251,7 @@ class RacingGameClient {
         // Object.values() преобразует объект players в массив значений
         Object.values(this.gameState.players).forEach(player => {
             this.drawCarWithImage(this.ctx, player);
-            this.checkBoundaries(this.ctx, player)
+            //this.checkBoundaries(this.ctx, player)
         });
     }
 
