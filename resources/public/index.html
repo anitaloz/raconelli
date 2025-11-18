@@ -19,10 +19,31 @@
 </div>
 
 <div id="info-panel">
-    <h3>Game Info</h3>
+    <h3>Гоночки</h3>
     <div>Connected: <span id="connection-status">Disconnected</span></div>
-    <div>Players: <span id="player-count">0</span></div>
+
+    <div id="game-time" style="margin: 10px 0; font-size: 16px; font-weight: bold;">
+        Время игры: <span id="time-display">00:00</span>
+    </div>
+
+    <div>Подключенные игроки: <span id="player-count">0</span></div>
+
     <div class="player-list" id="players-list"></div>
+
+    <div id="players-table-container" style="margin: 10px 0;">
+        <h3>Игроки</h3>
+        <table id="players-table" style="width: 100%; border-collapse: collapse;">
+            <thead>
+            <tr style="background: #f5f5f5;">
+                <th style="padding: 8px; border: 1px solid #ddd; text-align: center;">№</th>
+                <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Игрок</th>
+                <th style="padding: 8px; border: 1px solid #ddd; text-align: center;">Лучшее время</th>
+            </tr>
+            </thead>
+            <tbody id="players-table-body"></tbody>
+        </table>
+    </div>
+
 </div>
 
 <div id="game-container">

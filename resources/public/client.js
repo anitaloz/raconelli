@@ -48,6 +48,8 @@ class RacingGameClient {
         document.addEventListener('keydown', (e) => {
             this.keys[e.key.toLowerCase()] = true;   // true = нажата (состояние клавиши)
 
+            // console.log("check");
+
             // отправляем текущий ввод на сервер
             this.sendInput();
         });
@@ -307,6 +309,9 @@ class RacingGameClient {
         const players = Object.values(this.gameState.players);
         document.getElementById('player-count').textContent = players.length;
 
+        // игровое время
+        this.updateGameTimeDisplay();
+
         // обновляем счетчик игроков
         const playersList = document.getElementById('players-list');
         playersList.innerHTML = '';
@@ -327,6 +332,80 @@ class RacingGameClient {
             // добавляем элемент в список
             playersList.appendChild(playerElement);
         });
+
+        // таблица с игроками
+         const tableBody = document.getElementById('players-table-body');
+         tableBody.innerHTML = '';
+
+            // сортировка игроков по лучшему времени (по возрастанию)
+         const sortedPlayers = players.sort((a, b) => {
+            const timeA = a['best-time'] || a.bestTime || 0;
+            const timeB = b['best-time'] || b.bestTime || 0;
+            return timeA - timeB;
+         });
+
+            // строки таблицы
+         sortedPlayers.forEach((player, index) => {
+             const row = document.createElement('tr');
+
+                // выделяем текущего игрока
+             if (player.id === this.playerId) {
+                row.style.background = '#e3f2fd'; // фон для текущего игрока
+                row.style.fontWeight = 'bold';
+             }
+
+                // форматируем лучшее время
+             const bestTime = player['best-time'] || 0;
+             const formattedTime = this.formatTime(bestTime);
+
+             row.innerHTML = `
+                 <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
+                     ${index + 1}
+                 </td>
+                 <td style="padding: 8px; border: 1px solid #ddd; text-align: left;">
+                     <div style="display: flex; align-items: center; gap: 8px;">
+                        <div class="player-color" style="width: 12px; height: 12px; border-radius: 50%; background-color: ${player.color}"></div>
+                         ${player.name}
+                         ${player.id === this.playerId ? '<span style="color: #2196F3;">(Вы)</span>' : ''}
+                     </div>
+                 </td>
+                 <td style="padding: 8px; border: 1px solid #ddd; text-align: center; font-family: monospace;">
+                    ${formattedTime}
+                 </td>
+             `;
+
+             tableBody.appendChild(row);
+         });
+
+    }
+
+    formatTime(seconds) {
+        if (!seconds || seconds === 0) return '--:--.---';
+
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        const milliseconds = Math.floor((seconds % 1) * 1000);
+
+        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toFixed(3).padStart(6, '0')}`;
+    }
+
+    updateGameTimeDisplay() {
+        const gameTime = this.gameState['game-time']; // время в секундах
+
+        // секунды в минуты и секунды
+        const minutes = Math.floor(gameTime / 60);
+        const seconds = Math.floor(gameTime % 60);
+
+        // console.log(minutes, ":", seconds);
+
+        // форматирование
+        const formattedTime = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+
+        // обновление
+        const timeDisplay = document.getElementById('time-display');
+        if (timeDisplay) {
+                    timeDisplay.textContent = formattedTime;
+        }
     }
 
     // игровой цикл - вызывается постоянно для обновления отрисовки
