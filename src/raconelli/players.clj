@@ -1,18 +1,20 @@
 (ns raconelli.players)
 
 (defn create-player [id]
-  {:id id            ; уникальный идентификатор игрока
-   :x 100            ; начальная позиция по X
-   :y 100            ; начальная позиция по Y
+  {:id id
+   :x 450  ; Начинаем ЛЕВЕЕ чекпоинта 0
+   :y 100
    :speed 0
-   :angle 0  ; угол поворота игрока
+   :angle 0
    :hp 10
    :car (rand-nth ["red_bull", "mercedes", "ferrari", "zauber"])
    :color (rand-nth ["#FF0000" "#00FF00" "#0000FF" "#FFFF00" "#FF00FF" "#00FFFF"])
-   :last-update (System/currentTimeMillis)  ; время последнего обновления (в мс)
-   :name (str "Racer-" id )
+   :last-update (System/currentTimeMillis)
+   :name (str "Racer-" id)
    :best-time 0
-   })    ; имя игрока = "Player-" + первые 6 символов ID
+   :last-finish-time 0
+   :last-checkpoint -1
+   })  ; Добавляем отслеживание последнего обработанного чекпоинта; добавили начальный чекпоинт ; имя игрока = "Player-" + первые 6 символов ID
 
 (defn get-player-color [player-id players]
   "Функция получения цвета игрока"

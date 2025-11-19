@@ -129,3 +129,161 @@ body {
     border-radius: 3px;
     border: 1px solid #7f8c8d;
 }
+
+/* Players Table Styles */
+.players-table-container {
+    margin: 20px 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.players-table-title {
+    color: #e0e0e0;
+    margin-bottom: 15px;
+    font-weight: 500;
+    border-bottom: 2px solid #333;
+    padding-bottom: 8px;
+    font-size: 1.3em;
+}
+
+.players-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #1a1a1a;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    font-size: 14px;
+}
+
+.players-table thead {
+    background: linear-gradient(135deg, #2d2d2d, #404040);
+}
+
+.players-table th {
+    padding: 16px 12px;
+    text-align: center;
+    color: #ffffff;
+    font-weight: 600;
+    border-bottom: 2px solid #555;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9em;
+}
+
+.players-table th:first-child {
+    width: 60px;
+}
+
+.players-table th:last-child {
+    width: 120px;
+}
+
+.players-table tbody tr {
+    background: #252525;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #333;
+}
+
+.players-table tbody tr:nth-child(even) {
+    background: #2a2a2a;
+}
+
+.players-table tbody tr:hover {
+    background: #333;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.players-table td {
+    padding: 14px 12px;
+    color: #e0e0e0;
+    border-bottom: 1px solid #333;
+    transition: color 0.3s ease;
+}
+
+.players-table td:first-child {
+    text-align: center;
+    font-weight: 600;
+    color: #bbbbbb;
+}
+
+.players-table td:nth-child(2) {
+    text-align: left;
+    font-weight: 500;
+}
+
+.players-table td:last-child {
+    text-align: center;
+    font-weight: 600;
+}
+
+/* Position badges */
+.position-1 {
+    color: #FFD700 !important;
+    font-size: 1.1em;
+}
+
+.position-2 {
+    color: #C0C0C0 !important;
+}
+
+.position-3 {
+    color: #CD7F32 !important;
+}
+
+/* Time colors */
+.best-time {
+    color: #4CAF50 !important;
+    font-weight: 700;
+}
+
+.good-time {
+    color: #8BC34A !important;
+}
+
+.average-time {
+    color: #FFC107 !important;
+}
+
+.slow-time {
+    color: #FF9800 !important;
+}
+
+.no-time {
+    color: #757575 !important;
+    font-style: italic;
+}
+
+/* Current player highlight */
+.current-player {
+    background: linear-gradient(135deg, #3a3a3a, #4a4a4a) !important;
+    border-left: 4px solid #2196F3;
+    position: relative;
+}
+
+.current-player::before {
+    content: "▶";
+    color: #2196F3;
+    position: absolute;
+    left: 5px;
+    font-size: 0.8em;
+}
+
+/* Animations */
+@keyframes highlightUpdate {
+    0% { background: #4a4a4a; }
+    50% { background: #5a5a5a; }
+    100% { background: inherit; }
+}
+
+.updating {
+    animation: highlightUpdate 0.8s ease-in-out;
+}
+
+/* Empty state */
+.players-table-empty {
+    text-align: center;
+    color: #757575;
+    font-style: italic;
+    padding: 40px !important;
+}
