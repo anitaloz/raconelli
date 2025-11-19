@@ -3,18 +3,18 @@
             [raconelli.game-state :as game-state]))
 
 ;; Константы физики
-(def max-speed 6)
-(def acceleration 0.3)
+(def max-speed 5)
+(def acceleration 0.4)
 (def friction 0.988)
 (def rotation-speed 5)
 (def push-force 1.5)
 
 ;; Контрольные точки [x1 x2 y1 y2]
 (def checkpoints
-  [{:id 0 :x1 490 :x2 500 :y1 70 :y2 150  :type :start-finish}
-   {:id 1 :x1 400 :x2 500 :y1 300 :y2 310 :type :checkpoint}
-   {:id 2 :x1 500 :x2 510 :y1 440 :y2 530 :type :checkpoint}
-   {:id 3 :x1 80 :x2 140 :y1 290 :y2 300 :type :checkpoint}])
+  [{:id 0 :red 255 :green 0 :blue 0 :type :start-finish}
+   {:id 1 :red 0 :green 255 :blue 0 :type :checkpoint}
+   {:id 2 :red 0 :green 0 :blue 255 :type :checkpoint}
+   {:id 3 :red 255 :green 255 :blue 0 :type :checkpoint}])
 
 (def track-mask (javax.imageio.ImageIO/read (io/file "resources/public/mask.png")))
 
@@ -31,10 +31,26 @@
 
 (defn is-on-track? [x y]
   (let [color (get-pixel-color track-mask (int x) (int y))]
-    (boolean (and color
-                  (= (:red color) 0)
-                  (= (:green color) 0)
-                  (= (:blue color) 0)))))
+    (boolean (or (and color
+                      (= (:red color) 0)
+                      (= (:green color) 0)
+                      (= (:blue color) 0))
+                 (and color
+                      (= (:red color) 255)
+                      (= (:green color) 0)
+                      (= (:blue color) 0))
+                 (and color
+                      (= (:red color) 0)
+                      (= (:green color) 255)
+                      (= (:blue color) 0))
+                 (and color
+                      (= (:red color) 0)
+                      (= (:green color) 0)
+                      (= (:blue color) 255))
+                 (and color
+                      (= (:red color) 255)
+                      (= (:green color) 255)
+                      (= (:blue color) 0))))))
 
 ;; Размеры машины
 (def car-half-width 10)
@@ -67,10 +83,12 @@
 
 ;; Проверка находится ли машина в зоне контрольной точки
 (defn in-checkpoint? [x y checkpoint]
-  (and (>= x (:x1 checkpoint))
-       (<= x (:x2 checkpoint))
-       (>= y (:y1 checkpoint))
-       (<= y (:y2 checkpoint))))
+  (let [color (get-pixel-color track-mask (int x) (int y))]
+    (boolean (or (and color
+                      (= (:red color) (:red checkpoint))
+                      (= (:green color) (:green checkpoint))
+                      (= (:blue color) (:blue checkpoint)))
+                 ))))
 
 ;; Функция для отладки - логирование прохождения чекпоинтов
 ;; Обновленная функция для отладки - логирование прохождения чекпоинтов
