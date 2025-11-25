@@ -1,4 +1,4 @@
-// ГЛАВНЫЙ КЛАСС КЛИЕНТА
+//// ГЛАВНЫЙ КЛАСС КЛИЕНТА
 class RacingGameClient {
 
     constructor() {
@@ -282,6 +282,14 @@ class RacingGameClient {
         // игровое время
         this.updateGameTimeDisplay();
 
+        const gameStatus = this.gameState['game-status'] || 'playing';
+        if (gameStatus === 'finished') {
+            this.showGameResults();
+        } else {
+            // Скрываем уведомление о победителе когда игра активна
+            this.hideGameResults();
+        }
+
         // обновляем счетчик игроков
         const playersList = document.getElementById('players-list');
         playersList.innerHTML = '';
@@ -362,19 +370,99 @@ class RacingGameClient {
     updateGameTimeDisplay() {
         const gameTime = this.gameState['game-time']; // время в секундах
 
-        // секунды в минуты и секунды
-        const minutes = Math.floor(gameTime / 60);
-        const seconds = Math.floor(gameTime % 60);
+        const remainingTime = this.gameState['remaining-time'] || 60;
+        const restartTimer = this.gameState['restart-timer'] || 0;
+        const gameStatus = this.gameState['game-status'] || 'playing';
 
-        // console.log(minutes, ":", seconds);
-
-        // форматирование
-        const formattedTime = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
-
-        // обновление
         const timeDisplay = document.getElementById('time-display');
-        if (timeDisplay) {
-                    timeDisplay.textContent = formattedTime;
+        if (!timeDisplay) return;
+
+        if (gameStatus === 'finished') {
+            const restartSeconds = Math.ceil(restartTimer);
+            timeDisplay.textContent = `Restart in: ${restartSeconds}s`;
+            timeDisplay.style.color = '#ffaa00';
+            timeDisplay.style.fontWeight = 'bold';
+
+            // Обновляем уведомление о рестарте
+            this.updateRestartTimer(restartSeconds);
+        } else {
+            // секунды в минуты и секунды
+            const minutes = Math.floor(remainingTime / 60);
+            const seconds = Math.floor(remainingTime % 60);
+            const formattedTime = minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+
+            timeDisplay.textContent = formattedTime;
+            if (remainingTime <= 10) {
+                timeDisplay.style.color = '#ff4444';
+                timeDisplay.style.fontWeight = 'bold';
+            } else if (remainingTime <= 30) {
+                timeDisplay.style.color = '#ffaa00';
+            } else {
+                timeDisplay.style.color = '#ffffff';
+                timeDisplay.style.fontWeight = 'normal';
+            }
+        }
+    }
+
+    showGameResults() {
+        const winnerId = this.gameState['winner'];
+        const players = Object.values(this.gameState.players);
+        const restartTimer = this.gameState['restart-timer'] || 0;
+        const restartSeconds = Math.ceil(restartTimer);
+
+        let winnerInfo = 'No winner';
+        if (winnerId) {
+            const winner = players.find(p => p.id === winnerId);
+            if (winner) {
+                const bestTime = this.formatTime(winner['best-time'] || 0);
+                winnerInfo = `🏆 Winner: ${winner.name} - ${bestTime}`;
+            }
+        }
+
+        let resultsElement = document.getElementById('game-results');
+        if (!resultsElement) {
+            resultsElement = document.createElement('div');
+            resultsElement.id = 'game-results';
+            resultsElement.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.9);
+                color: white;
+                padding: 20px;
+                border-radius: 10px;
+                text-align: center;
+                z-index: 1000;
+                border: 2px solid gold;
+                min-width: 300px;
+            `;
+            document.body.appendChild(resultsElement);
+        }
+
+        resultsElement.innerHTML = `
+            <h2 style="color: gold; margin-bottom: 15px;">🏁 RACE FINISHED! 🏁</h2>
+            <p style="font-size: 18px; margin-bottom: 10px;">${winnerInfo}</p>
+            <p style="font-size: 16px; color: #ffaa00; margin-bottom: 15px;">
+                Restarting in: <span id="restart-counter">${restartSeconds}</span> seconds
+            </p>
+            <p style="font-size: 14px; color: #ccc;">You cant move your car during countdown</p>
+        `;
+
+        resultsElement.style.display = 'block';
+    }
+
+    updateRestartTimer(seconds) {
+        const counterElement = document.getElementById('restart-counter');
+        if (counterElement) {
+            counterElement.textContent = seconds;
+        }
+    }
+
+    hideGameResults() {
+        const resultsElement = document.getElementById('game-results');
+        if (resultsElement) {
+            resultsElement.style.display = 'none';
         }
     }
 

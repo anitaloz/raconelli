@@ -6,6 +6,7 @@
 
 ;; обработчик ввода игрока
 (defn handle-player-input [player-id input-data]
+  ;(println "Handling input for player" player-id ":" input-data)
   (game-state/update-player! player-id #(physics/handle-player-input % input-data)))
 
 ;; проверка уникальности ID
