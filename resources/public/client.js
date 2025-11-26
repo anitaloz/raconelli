@@ -85,6 +85,24 @@ class RacingGameClient {
             }
 
         });
+
+        const changeCar = document.getElementById('change-car-btn');
+        const changeTyres = document.getElementById('change-tyres-btn');
+
+        changeCar.addEventListener('click', ()=>{
+            this.ws.send(JSON.stringify({
+                type: 'change-car',   // тип сообщения
+                playerId: this.playerId
+            }));
+        });
+
+        changeTyres.addEventListener('click', () =>{
+            this.ws.send(JSON.stringify({
+                type: 'change-tyres',   // тип сообщения
+                playerId: this.playerId,
+                tyresType: 'tyretype'
+            }));
+        });
     }
 
     // подключение к WebSocket серверу
@@ -227,7 +245,7 @@ class RacingGameClient {
         ctx.rotate(player.angle * Math.PI / 180);
 
         // отрисовка машинки
-        ctx.fillStyle = player.color;
+        ctx.fillStyle = '#ffffff';
         ctx.fillRect(-15, -8, 30, 16);
 
         // более подробная отрисовка машинки
@@ -300,10 +318,9 @@ class RacingGameClient {
             playerElement.className = 'player-item';
 
             // HTML содержимое элемента игрока:
-            // - Цветной квадратик с цветом машины
-            // - Укороченный ID игрока (первые 8 символов)
+            // Цветной квадратик с цветом машины
             playerElement.innerHTML = `
-                        <div class="player-color" style="background-color: ${player.color}"></div>
+                        <div class="player-color" style="background-color: white"></div>
                         Player ${player.id}
                     `;
 
@@ -342,7 +359,7 @@ class RacingGameClient {
                  </td>
                  <td style="padding: 8px; border: 1px solid #ddd; text-align: left;">
                      <div style="display: flex; align-items: center; gap: 8px;">
-                        <div class="player-color" style="width: 12px; height: 12px; border-radius: 50%; background-color: ${player.color}"></div>
+                        <div class="player-color" style="width: 12px; height: 12px; border-radius: 50%; background-color: white"></div>
                          ${player.name}
                          ${player.id === this.playerId ? '<span style="color: #2196F3;">(Вы)</span>' : ''}
                      </div>
@@ -358,7 +375,7 @@ class RacingGameClient {
     }
 
     formatTime(seconds) {
-        if (!seconds || seconds === 0) return '--:--.---';
+        if (!seconds || seconds === 0) return 'no time';
 
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = seconds % 60;

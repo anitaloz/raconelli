@@ -83,6 +83,14 @@
                                                       "player-input" ;; ввод игрока
                                                       (handle-player-input (:playerId message) (:input message))
 
+                                                      "change-tyres" ;; смена шин
+                                                      (println "TODO: смена шин"
+                                                        )
+
+                                                      "change-car" ;; смена машины
+                                                      ( println "TODO: смена машины"
+                                                        )
+
                                                       "ping"  ;; ping-запрос
                                                       (server/send! channel (json/write-str {:type "pong"}))
 
