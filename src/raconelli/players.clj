@@ -1,5 +1,5 @@
 (ns raconelli.players)
-(def car-types ["zauber" "mercedes" "ferrari" "red_bull"])
+(def car-types ["zauber" "mercedes" "ferrari" "red_bull", "pickme"])
 (defn create-player [id]
   {:id id
    :x 450  ; Начинаем ЛЕВЕЕ чекпоинта 0
