@@ -1,5 +1,5 @@
 (ns raconelli.players)
-
+(def car-types ["zauber" "mercedes" "ferrari" "red_bull"])
 (defn create-player [id]
   {:id id
    :x 450  ; Начинаем ЛЕВЕЕ чекпоинта 0
@@ -7,7 +7,7 @@
    :speed 0
    :angle 0
    :hp 10
-   :car (rand-nth ["red_bull", "mercedes", "ferrari", "zauber"]) ;mclaren,haas,alpine,aston martin,williams
+   :car (rand-nth car-types) ;mclaren,haas,alpine,aston martin,williams
    ;:color (rand-nth ["#FF0000" "#00FF00" "#0000FF" "#FFFF00" "#FF00FF" "#00FFFF"])
    :last-update (System/currentTimeMillis)
    :name (str "Racer-" id)
@@ -39,3 +39,10 @@
 ;  (into {} (map (fn [[id player]]     ;; into {} - преобразует последовательность в map
 ;                  [id (select-keys player [:x :y :angle :color])])  ;; Для каждого [id player] создаем пару [id {данные игрока}]
 ;                players)))
+
+
+;; функция для переключения машины
+(defn next-car [current]
+  (let [idx (.indexOf car-types current)
+        next-idx (mod (inc idx) (count car-types))]
+    (nth car-types next-idx)))

@@ -494,6 +494,17 @@ class RacingGameClient {
     }
 }
 
+const changeCarBtn = document.getElementById('change-car-btn');
+
+changeCarBtn.addEventListener('click', () => {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        this.ws.send(JSON.stringify({
+            type: 'change-car',   // тип сообщения
+            playerId: this.playerId
+        }));
+    }
+});
+
 // запуск игры после загрузки страницы
 window.addEventListener('load', () => {
 

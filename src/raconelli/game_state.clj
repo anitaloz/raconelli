@@ -163,4 +163,6 @@
           (reset-game!); перезапускаем игру
           true))))) ; возвращаем true если игра перезапущена
 
-
+;; получение игрока по айди
+(defn get-player [player-id]
+  (get-in @game-state [:players player-id]))

@@ -2,7 +2,8 @@
   (:require [org.httpkit.server :as server]
             [clojure.data.json :as json]
             [raconelli.game-state :as game-state]
-            [raconelli.physics :as physics]))
+            [raconelli.physics :as physics]
+            [raconelli.players :as players]))
 
 ;; обработчик ввода игрока
 (defn handle-player-input [player-id input-data]
@@ -88,8 +89,14 @@
                                                         )
 
                                                       "change-car" ;; смена машины
-                                                      ( println "TODO: смена машины"
-                                                        )
+                                                      (let [pid (:playerId message)
+                                                            player (game-state/get-player pid)
+                                                            old-car (:car player)
+                                                            new-car (players/next-car old-car)]
+                                                        (println "Player" pid "changed car to" new-car)
+                                                        (game-state/update-player! pid #(assoc % :car new-car)))
+                                                      ;( println "TODO: смена машины"
+                                                      ;  )
 
                                                       "ping"  ;; ping-запрос
                                                       (server/send! channel (json/write-str {:type "pong"}))
