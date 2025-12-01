@@ -90,10 +90,12 @@ class RacingGameClient {
         const changeTyres = document.getElementById('change-tyres-btn');
 
         changeCar.addEventListener('click', ()=>{
-            this.ws.send(JSON.stringify({
-                type: 'change-car',   // тип сообщения
-                playerId: this.playerId
-            }));
+            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                this.ws.send(JSON.stringify({
+                    type: 'change-car',   // тип сообщения
+                    playerId: this.playerId
+                }));
+            }
         });
 
         changeTyres.addEventListener('click', () =>{
@@ -124,6 +126,7 @@ class RacingGameClient {
             // обновляем статус подключения в UI
             document.getElementById('connection-status').textContent = 'Connected';
 
+            console.log("send-id: ", this.playerId);
             // отправляем сообщение на сервер в формате JSON
             this.ws.send(JSON.stringify({
                 type: 'player-id',   // тип сообщения
@@ -493,17 +496,6 @@ class RacingGameClient {
         requestAnimationFrame(() => this.gameLoop());
     }
 }
-
-const changeCarBtn = document.getElementById('change-car-btn');
-
-changeCarBtn.addEventListener('click', () => {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        this.ws.send(JSON.stringify({
-            type: 'change-car',   // тип сообщения
-            playerId: this.playerId
-        }));
-    }
-});
 
 // запуск игры после загрузки страницы
 window.addEventListener('load', () => {
