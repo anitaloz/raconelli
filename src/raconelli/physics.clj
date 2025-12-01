@@ -233,11 +233,26 @@
                               (recur (dec attempts) (* force-mult 1.5) best-pos)
                               {:x try-x :y try-y :speed 0}))))]
 
-        (-> player
-            (assoc :x (:x final-pos))
-            (assoc :y (:y final-pos))
-            (assoc :speed (:speed final-pos))
-            (assoc :collision-flag true)))
+        ;(-> player
+        ;    (assoc :x (:x final-pos))
+        ;    (assoc :y (:y final-pos))
+        ;    (assoc :speed (:speed final-pos))
+        ;    (assoc :collision-flag true))
+        (let [now (System/currentTimeMillis)
+              invincible? (< now (:invincible-until player 0))
+              damage 10]    ;; сколько HP снимаем за удар
+          (-> player
+              (assoc :x (:x final-pos))
+              (assoc :y (:y final-pos))
+              (assoc :speed (:speed final-pos))
+              (assoc :collision-flag true)
+              ;; Урон только если нет неуязвимости
+              (cond->
+                (not invincible?)
+                (-> (update :hp #(max 0 (- % damage)))
+                    (assoc :invincible-until (+ now 1000)) ;; 1 сек неуязвимости
+                    (assoc :blink 60) ;; мигаем 60 кадров
+                    )))))
 
       (dissoc player :collision-flag))))
 
@@ -299,5 +314,5 @@
   (-> player
       update-player-physics
       check-boundaries
-      limit-speed))
-
+      limit-speed
+      (update :blink #(max 0 (dec %)))))

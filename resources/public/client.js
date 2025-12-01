@@ -27,7 +27,7 @@ class RacingGameClient {
         var trackImg=new Image()
         trackImg.src=`track.jpg`
         this.trackImage=trackImg
-        const carTypes = ['zauber', 'mercedes', 'ferrari', 'red_bull']; // Добавьте нужные типы машинок
+        const carTypes = ['zauber', 'mercedes', 'ferrari', 'red_bull', "pickme"]; // Добавьте нужные типы машинок
 
         carTypes.forEach(carType => {
             const img = new Image();
@@ -87,8 +87,6 @@ class RacingGameClient {
         });
 
         const changeCar = document.getElementById('change-car-btn');
-        const changeTyres = document.getElementById('change-tyres-btn');
-
         changeCar.addEventListener('click', ()=>{
             if (this.ws && this.ws.readyState === WebSocket.OPEN) {
                 this.ws.send(JSON.stringify({
@@ -98,6 +96,8 @@ class RacingGameClient {
             }
         });
 
+
+        const changeTyres = document.getElementById('change-tyres-btn');
         changeTyres.addEventListener('click', () =>{
             this.ws.send(JSON.stringify({
                 type: 'change-tyres',   // тип сообщения
@@ -207,6 +207,14 @@ class RacingGameClient {
 
     drawCarWithImage(ctx, player) {
         var carType = player.car || 'ferrari'
+        // ---- МИГАНИЕ МАШИНЫ ----
+        if (player.invincibleUntil && Date.now() < player.invincibleUntil) {
+            // Мигаем: рисуем только каждый второй кадр
+            if (Math.floor(Date.now() / 100) % 2 === 0) {
+                return; // пропускаем кадр — машинка исчезает
+            }
+        }
+        // -------------------------
         if (this.carImages.has(carType)) {
             const carImage = this.carImages.get(carType);
             ctx.save();
@@ -244,6 +252,17 @@ class RacingGameClient {
 
         // перемещаем начало координат в позицию машины
         ctx.translate(player.x, player.y);
+
+        // // ======= HP BAR (всегда сверху и не поворачивается) =======
+        //
+        // // красный фон
+        // ctx.fillStyle = "red";
+        // ctx.fillRect(-20, -30, 40, 5);
+        //
+        // // зелёная полоска (текущий hp)
+        // ctx.fillStyle = "lime";
+        // ctx.fillRect(-20, -30, 40 * (player.hp / player.maxHp), 5);
+
         // поворачиваем контекст на угол машины (перевод из градусов в радианы)
         ctx.rotate(player.angle * Math.PI / 180);
 
@@ -263,8 +282,9 @@ class RacingGameClient {
         ctx.fillRect(7, -10, 5, 4);
         ctx.fillRect(7, 6, 5, 4);
 
-       // восстанавливаем состояние контекста (отменяем трансформации)
+        // восстанавливаем состояние контекста (отменяем трансформации)
         ctx.restore();
+
     }
 
 
@@ -289,10 +309,22 @@ class RacingGameClient {
         // отрисовка всех игроков (для каждого игрока из геймстейта вызывается функция отрисовки)
         // Object.values() преобразует объект players в массив значений
         Object.values(this.gameState.players).forEach(player => {
+            player.maxHp = player.maxHp || 100;
+            player.hp = player.hp || 100;
+            console.log("Drawing player:", player.id, "HP:", player.hp);
             this.drawCarWithImage(this.ctx, player);
             //this.checkBoundaries(this.ctx, player)
         });
     }
+// Обновление хп
+    updateHP(player) {
+        const hpBar = document.getElementById('hp-bar');
+        if (hpBar && player.hp != null && player.maxHp != null) {
+            const percentage = Math.max(0, Math.min(1, player.hp / player.maxHp)) * 100;
+            hpBar.style.width = percentage + '%';
+        }
+    }
+
 
     // обновление пользовательского интерфейса (боковая панель)
     updateUI() {
@@ -335,7 +367,7 @@ class RacingGameClient {
          const tableBody = document.getElementById('players-table-body');
          tableBody.innerHTML = '';
 
-            // сортировка игроков по лучшему времени (по возрастанию)
+        // сортировка игроков по лучшему времени (по возрастанию)
          const sortedPlayers = players.sort((a, b) => {
             const timeA = a['best-time'] || a.bestTime || 0;
             const timeB = b['best-time'] || b.bestTime || 0;
@@ -374,6 +406,9 @@ class RacingGameClient {
 
              tableBody.appendChild(row);
          });
+        Object.values(this.gameState.players).forEach(player => {
+            this.updateHP(player);
+        });
 
     }
 

@@ -95,8 +95,6 @@
                                                             new-car (players/next-car old-car)]
                                                         (println "Player" pid "changed car to" new-car)
                                                         (game-state/update-player! pid #(assoc % :car new-car)))
-                                                      ;( println "TODO: смена машины"
-                                                      ;  )
 
                                                       "ping"  ;; ping-запрос
                                                       (server/send! channel (json/write-str {:type "pong"}))
