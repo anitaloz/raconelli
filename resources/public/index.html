@@ -76,9 +76,23 @@
     </div>
 
 </div>
-<div id="hp-container" style="width: 200px; height: 20px; border: 2px solid #000; background: #f00; margin-bottom: 10px;">
-    <div id="hp-bar" style="width: 100%; height: 100%; background: #0f0;"></div>
+<div id="player-info" style="color: #ff4444; font-weight: bold; margin-bottom: 10px;"></div>
+
+<div id="hp-table-container">
+    <table id="hp-table" style="border-collapse: collapse; width: 200px; color: #fff; font-family: sans-serif;">
+        <thead>
+        <tr>
+            <th style="text-align: left; padding: 4px;">Player</th>
+            <th style="text-align: left; padding: 4px;">HP</th>
+        </tr>
+        </thead>
+        <tbody id="hp-table-body">
+        <!-- динамически добавляем строки -->
+        </tbody>
+    </table>
 </div>
+
+
 
 <div id="game-container">
     <canvas id="game-canvas" width="800" height="600"></canvas>

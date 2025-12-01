@@ -238,21 +238,15 @@
         ;    (assoc :y (:y final-pos))
         ;    (assoc :speed (:speed final-pos))
         ;    (assoc :collision-flag true))
-        (let [now (System/currentTimeMillis)
-              invincible? (< now (:invincible-until player 0))
-              damage 10]    ;; сколько HP снимаем за удар
+        (let [damage 10    ;; сколько HP снимаем за удар
+              new-hp (max 0 (- (:hp player) damage))]
           (-> player
               (assoc :x (:x final-pos))
               (assoc :y (:y final-pos))
               (assoc :speed (:speed final-pos))
               (assoc :collision-flag true)
-              ;; Урон только если нет неуязвимости
-              (cond->
-                (not invincible?)
-                (-> (update :hp #(max 0 (- % damage)))
-                    (assoc :invincible-until (+ now 1000)) ;; 1 сек неуязвимости
-                    (assoc :blink 60) ;; мигаем 60 кадров
-                    )))))
+              (assoc :hp new-hp)))
+        )
 
       (dissoc player :collision-flag))))
 
@@ -314,5 +308,4 @@
   (-> player
       update-player-physics
       check-boundaries
-      limit-speed
-      (update :blink #(max 0 (dec %)))))
+      limit-speed))

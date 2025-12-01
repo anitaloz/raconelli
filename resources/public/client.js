@@ -188,33 +188,48 @@ class RacingGameClient {
     sendInput() {
         // проверяем что соединение открыто и готово к отправке
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            const player = this.gameState.players[this.playerId];
+            // проверка, может ли игрок двигаться
+            // Проверяем статус смерти
+            // if (player.canMove === false) {
+            //     const elapsed = Date.now() - player.deathTime;
+            //     if (elapsed < 5000) {
+            //         // Ещё мёртв — запрещаем движение
+            //         player.canMove = false;
+            //         const info = document.getElementById('player-info');
+            //         if (info) {
+            //             info.textContent = `🚫 Вы не можете ехать! Осталось: ${Math.ceil((5000 - elapsed)/1000)} сек`;
+            //         }
+            //         return;
+            //     } else {
+            //         // Прошло 5 секунд — возрождаем
+            //         player.hp = 100;
+            //         player.deathTime = null;
+            //         player.canMove = true;
+            //     }
+            // }
             // формируем объект ввода на основе нажатых клавиш
-            const input = {
-                up: this.keys['w'] || false,
-                down: this.keys['s'] || false,
-                left: this.keys['a'] || false,
-                right: this.keys['d'] || false
-            };
-            // отправляем сообщение на сервер в формате JSON
-            this.ws.send(JSON.stringify({
-                type: 'player-input',   // тип сообщения
-                playerId: this.playerId,
-                input: input
-            }));
-            // обработка в вебсокет хэндлере в r.web_socket
+            if (player.canMove) {
+                const input = {
+                    up: this.keys['w'] || false,
+                    down: this.keys['s'] || false,
+                    left: this.keys['a'] || false,
+                    right: this.keys['d'] || false
+                };
+                // отправляем сообщение на сервер в формате JSON
+                this.ws.send(JSON.stringify({
+                    type: 'player-input',   // тип сообщения
+                    playerId: this.playerId,
+                    input: input
+                }));
+                // обработка в вебсокет хэндлере в r.web_socket
+            }
         }
     }
 
     drawCarWithImage(ctx, player) {
         var carType = player.car || 'ferrari'
-        // ---- МИГАНИЕ МАШИНЫ ----
-        if (player.invincibleUntil && Date.now() < player.invincibleUntil) {
-            // Мигаем: рисуем только каждый второй кадр
-            if (Math.floor(Date.now() / 100) % 2 === 0) {
-                return; // пропускаем кадр — машинка исчезает
-            }
-        }
-        // -------------------------
+
         if (this.carImages.has(carType)) {
             const carImage = this.carImages.get(carType);
             ctx.save();
@@ -249,20 +264,8 @@ class RacingGameClient {
     drawCar(ctx, player) {
         // сохраняем текущее состояние контекста
         ctx.save();
-
         // перемещаем начало координат в позицию машины
         ctx.translate(player.x, player.y);
-
-        // // ======= HP BAR (всегда сверху и не поворачивается) =======
-        //
-        // // красный фон
-        // ctx.fillStyle = "red";
-        // ctx.fillRect(-20, -30, 40, 5);
-        //
-        // // зелёная полоска (текущий hp)
-        // ctx.fillStyle = "lime";
-        // ctx.fillRect(-20, -30, 40 * (player.hp / player.maxHp), 5);
-
         // поворачиваем контекст на угол машины (перевод из градусов в радианы)
         ctx.rotate(player.angle * Math.PI / 180);
 
@@ -311,18 +314,76 @@ class RacingGameClient {
         Object.values(this.gameState.players).forEach(player => {
             player.maxHp = player.maxHp || 100;
             player.hp = player.hp || 100;
-            console.log("Drawing player:", player.id, "HP:", player.hp);
+            // console.log("Drawing player:", player.id, "HP:", player.hp);
             this.drawCarWithImage(this.ctx, player);
             //this.checkBoundaries(this.ctx, player)
+            // this.updateHP(player); // обновление таблицы HP
         });
     }
 // Обновление хп
     updateHP(player) {
-        const hpBar = document.getElementById('hp-bar');
+        const tbody = document.getElementById('hp-table-body');
+        if (!tbody) return;
+
+        let row = document.getElementById(`hp-row-${player.id}`);
+        if (!row) {
+            // создаем строку для игрока
+            row = document.createElement('tr');
+            row.id = `hp-row-${player.id}`;
+
+            const nameCell = document.createElement('td');
+            nameCell.textContent = `${player.id}`;
+            nameCell.style.padding = '4px';
+            row.appendChild(nameCell);
+
+            const barCell = document.createElement('td');
+            barCell.style.padding = '4px';
+            const hpBar = document.createElement('div');
+            hpBar.id = `hp-bar-${player.id}`;
+            hpBar.style.cssText = "width: 100%; height: 12px; background: linear-gradient(to right, #6fcf97, #56ccf2); border: 1px solid #888; border-radius: 4px;";
+            barCell.appendChild(hpBar);
+            row.appendChild(barCell);
+
+            tbody.appendChild(row);
+        }
+
+        const hpBar = document.getElementById(`hp-bar-${player.id}`);
         if (hpBar && player.hp != null && player.maxHp != null) {
             const percentage = Math.max(0, Math.min(1, player.hp / player.maxHp)) * 100;
             hpBar.style.width = percentage + '%';
         }
+    }
+
+    updateDeadStates() {
+        Object.values(this.gameState.players).forEach(player => {
+            // // фиксируем время смерти только один раз
+            // if (player.hp === 0 && !player.deathTime) {
+            //     player.deathTime = Date.now();
+            //     player.canMove = false;
+            // }
+            //
+            // // проверяем время для возрождения
+            // if (player.deathTime) {
+            //     const elapsed = Date.now() - player.deathTime;
+            //     if (elapsed >= 5000) {
+            //         player.hp = player.maxHp || 100;
+            //         player.deathTime = null;
+            //         player.canMove = true;
+            //
+            //         if (player.id === this.playerId) {
+            //             const info = document.getElementById('player-info');
+            //             if (info) info.textContent = '';
+            //         }
+            //     } else {
+            //         if (player.id === this.playerId) {
+            //             const info = document.getElementById('player-info');
+            //             if (info) info.textContent = `🚫 Вы не можете ехать! Осталось: ${Math.ceil((5000 - elapsed)/1000)} сек`;
+            //         }
+            //     }
+            // }
+
+            this.updateHP(player);
+        });
     }
 
 
@@ -364,31 +425,31 @@ class RacingGameClient {
         });
 
         // таблица с игроками
-         const tableBody = document.getElementById('players-table-body');
-         tableBody.innerHTML = '';
+        const tableBody = document.getElementById('players-table-body');
+        tableBody.innerHTML = '';
 
         // сортировка игроков по лучшему времени (по возрастанию)
-         const sortedPlayers = players.sort((a, b) => {
+        const sortedPlayers = players.sort((a, b) => {
             const timeA = a['best-time'] || a.bestTime || 0;
             const timeB = b['best-time'] || b.bestTime || 0;
             return timeA - timeB;
-         });
+        });
 
-            // строки таблицы
-         sortedPlayers.forEach((player, index) => {
-             const row = document.createElement('tr');
+        // строки таблицы
+        sortedPlayers.forEach((player, index) => {
+            const row = document.createElement('tr');
 
-                // выделяем текущего игрока
-             if (player.id === this.playerId) {
+            // выделяем текущего игрока
+            if (player.id === this.playerId) {
                 row.style.background = '#0c293e'; // фон для текущего игрока
                 row.style.fontWeight = 'bold';
-             }
+            }
 
-                // форматируем лучшее время
-             const bestTime = player['best-time'] || 0;
-             const formattedTime = this.formatTime(bestTime);
+            // форматируем лучшее время
+            const bestTime = player['best-time'] || 0;
+            const formattedTime = this.formatTime(bestTime);
 
-             row.innerHTML = `
+            row.innerHTML = `
                  <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
                      ${index + 1}
                  </td>
@@ -404,12 +465,9 @@ class RacingGameClient {
                  </td>
              `;
 
-             tableBody.appendChild(row);
-         });
-        Object.values(this.gameState.players).forEach(player => {
-            this.updateHP(player);
+            tableBody.appendChild(row);
         });
-
+        // this.updateDeadStates();
     }
 
     formatTime(seconds) {
@@ -523,6 +581,11 @@ class RacingGameClient {
 
     // игровой цикл - вызывается постоянно для обновления отрисовки
     gameLoop() {
+        // //обновляем состояние "мертвых" игроков
+        this.updateDeadStates();
+
+
+
         // отрисовка текущего состояния
         this.render();
 

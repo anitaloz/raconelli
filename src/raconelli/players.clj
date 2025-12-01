@@ -8,8 +8,12 @@
    :angle 0
    :hp 100                 ;здоровье
    :maxHp 200     ; максимум здоровья
-   :invincible-until 0 ;неуязвимость после столкновения
-   :blink 0
+   :deadUntil 0
+   :deadMessageShown false
+   :canMove true
+   :deathTime nil
+   ;:invincibleUntil  0 ;неуязвимость после столкновения
+   ;:blink 0
    :car (rand-nth car-types) ;mclaren,haas,alpine,aston martin,williams
    ;:color (rand-nth ["#FF0000" "#00FF00" "#0000FF" "#FFFF00" "#FF00FF" "#00FFFF"])
    :last-update (System/currentTimeMillis)
@@ -49,19 +53,3 @@
   (let [idx (.indexOf car-types current)
         next-idx (mod (inc idx) (count car-types))]
     (nth car-types next-idx)))
-
-(defn damage-player [player amount]
-  (if (:invulnerable? player)
-    player ;; если есть неуязвимость — ничего не делаем
-    (-> player
-        (update :hp #(max 0 (- % amount)))
-        (assoc :invulnerable? true
-               :invuln-timer 20))))  ;; 20 тиков неуязвимости
-
-(defn update-invulnerability [player]
-  (if (:invulnerable? player)
-    (let [t (:invuln-timer player)]
-      (if (<= t 1)
-        (assoc player :invulnerable? false :invuln-timer 0)
-        (update player :invuln-timer dec)))
-    player))
