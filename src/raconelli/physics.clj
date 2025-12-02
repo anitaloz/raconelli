@@ -238,14 +238,27 @@
         ;    (assoc :y (:y final-pos))
         ;    (assoc :speed (:speed final-pos))
         ;    (assoc :collision-flag true))
-        (let [damage 10    ;; сколько HP снимаем за удар
+        (let [damage (:damage player)    ;; сколько HP снимаем за удар
               new-hp (max 0 (- (:hp player) damage))]
+          (if (< new-hp 1)
+            ;(println "minus hp")
+            (
+             (assoc player :canMove false)
+             (println "player can move: " (:canMove player))
+              )
+            (println "hp >= 1")
+            ;(assoc player :canMove false)
+            )
           (-> player
               (assoc :x (:x final-pos))
               (assoc :y (:y final-pos))
               (assoc :speed (:speed final-pos))
               (assoc :collision-flag true)
-              (assoc :hp new-hp)))
+              (assoc :hp new-hp)
+              ;(println "CHECK")
+          )
+          ;(println "CHECK")
+          )
         )
 
       (dissoc player :collision-flag))))

@@ -189,27 +189,9 @@ class RacingGameClient {
         // проверяем что соединение открыто и готово к отправке
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             const player = this.gameState.players[this.playerId];
-            // проверка, может ли игрок двигаться
-            // Проверяем статус смерти
-            // if (player.canMove === false) {
-            //     const elapsed = Date.now() - player.deathTime;
-            //     if (elapsed < 5000) {
-            //         // Ещё мёртв — запрещаем движение
-            //         player.canMove = false;
-            //         const info = document.getElementById('player-info');
-            //         if (info) {
-            //             info.textContent = `🚫 Вы не можете ехать! Осталось: ${Math.ceil((5000 - elapsed)/1000)} сек`;
-            //         }
-            //         return;
-            //     } else {
-            //         // Прошло 5 секунд — возрождаем
-            //         player.hp = 100;
-            //         player.deathTime = null;
-            //         player.canMove = true;
-            //     }
-            // }
-            // формируем объект ввода на основе нажатых клавиш
-            if (player.canMove) {
+
+            if (player.hp !== 0) {
+                console.log("player hp: ", player.hp);
                 const input = {
                     up: this.keys['w'] || false,
                     down: this.keys['s'] || false,
@@ -312,12 +294,12 @@ class RacingGameClient {
         // отрисовка всех игроков (для каждого игрока из геймстейта вызывается функция отрисовки)
         // Object.values() преобразует объект players в массив значений
         Object.values(this.gameState.players).forEach(player => {
-            player.maxHp = player.maxHp || 100;
-            player.hp = player.hp || 100;
-            // console.log("Drawing player:", player.id, "HP:", player.hp);
+            // player.maxHp = player.maxHp || 100;
+            // player.hp = 100;
+            console.log("Drawing player:", player.id, "HP:", player.hp);
             this.drawCarWithImage(this.ctx, player);
             //this.checkBoundaries(this.ctx, player)
-            // this.updateHP(player); // обновление таблицы HP
+            this.updateHP(player); // обновление таблицы HP
         });
     }
 // Обновление хп
@@ -353,40 +335,6 @@ class RacingGameClient {
             hpBar.style.width = percentage + '%';
         }
     }
-
-    updateDeadStates() {
-        Object.values(this.gameState.players).forEach(player => {
-            // // фиксируем время смерти только один раз
-            // if (player.hp === 0 && !player.deathTime) {
-            //     player.deathTime = Date.now();
-            //     player.canMove = false;
-            // }
-            //
-            // // проверяем время для возрождения
-            // if (player.deathTime) {
-            //     const elapsed = Date.now() - player.deathTime;
-            //     if (elapsed >= 5000) {
-            //         player.hp = player.maxHp || 100;
-            //         player.deathTime = null;
-            //         player.canMove = true;
-            //
-            //         if (player.id === this.playerId) {
-            //             const info = document.getElementById('player-info');
-            //             if (info) info.textContent = '';
-            //         }
-            //     } else {
-            //         if (player.id === this.playerId) {
-            //             const info = document.getElementById('player-info');
-            //             if (info) info.textContent = `🚫 Вы не можете ехать! Осталось: ${Math.ceil((5000 - elapsed)/1000)} сек`;
-            //         }
-            //     }
-            // }
-
-            this.updateHP(player);
-        });
-    }
-
-
     // обновление пользовательского интерфейса (боковая панель)
     updateUI() {
         // получаем массив всех игроков
@@ -581,20 +529,13 @@ class RacingGameClient {
 
     // игровой цикл - вызывается постоянно для обновления отрисовки
     gameLoop() {
-        // //обновляем состояние "мертвых" игроков
-        this.updateDeadStates();
-
-
-
         // отрисовка текущего состояния
         this.render();
-
         // запрашиваем следующий кадр анимации (рекурсивный вызов)
         // requestAnimationFrame оптимизирует отрисовку под частоту обновления экрана
         requestAnimationFrame(() => this.gameLoop());
     }
 }
-
 // запуск игры после загрузки страницы
 window.addEventListener('load', () => {
 

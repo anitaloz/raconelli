@@ -6,13 +6,14 @@
    :y 100
    :speed 0
    :angle 0
-   :hp 100                 ;здоровье
+   :hp 100        ; здоровье ДЛЯ ШИН
    :maxHp 200     ; максимум здоровья
-   :deadUntil 0
-   :deadMessageShown false
-   :canMove true
-   :deathTime nil
-   ;:invincibleUntil  0 ;неуязвимость после столкновения
+   :damage 10    ; сколько хп снимается за удар со стеной ДЛЯ ШИН
+   ;:deadUntil 0
+   ;:deadMessageShown false
+   ;:canMove true
+   ;:deathTime nil
+   ;:invincibleUntil  0 ; неуязвимость после столкновения
    ;:blink 0
    :car (rand-nth car-types) ;mclaren,haas,alpine,aston martin,williams
    ;:color (rand-nth ["#FF0000" "#00FF00" "#0000FF" "#FFFF00" "#FF00FF" "#00FFFF"])
@@ -22,7 +23,7 @@
    :last-finish-time 0
    :last-checkpoint -1
    :tyres nil
-   })  ; Добавляем отслеживание последнего обработанного чекпоинта; добавили начальный чекпоинт ; имя игрока = "Player-" + первые 6 символов ID
+   })  ; Добавляем отслеживание последнего обработанного чекпоинта; добавили начальный чекпоинт
 
 ;; смена цвета машинки
 (defn change-car [color]
