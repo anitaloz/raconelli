@@ -1,4 +1,3 @@
-//// ГЛАВНЫЙ КЛАСС КЛИЕНТА
 class RacingGameClient {
 
     constructor() {
@@ -13,11 +12,16 @@ class RacingGameClient {
         this.onTrack = true
         this.isConnected = false;
 
+        // Кнопки смены шин
+        this.tyreButtons = {
+            soft: document.getElementById('soft-tyres-btn'),
+            medium: document.getElementById('medium-tyres-btn'),
+            hard: document.getElementById('hard-tyres-btn')
+        };
+
         // вызов методов инициализации (все функции ниже)
         this.setupEventListeners();  // настройка обработчиков событий
-
-//        this.connect();              // подключение к серверу
-//        this.gameLoop();             // запуск игрового цикла
+        this.setupTyreButtons();     // настройка кнопок шин
 
         // Предзагрузка изображений машинок
         this.preloadCarImages();
@@ -39,6 +43,18 @@ class RacingGameClient {
             img.onerror = () => {
                 console.error(`Failed to load car image: ${carType}`);
             };
+        });
+    }
+
+    // Настройка кнопок смены шин
+    setupTyreButtons() {
+        // Обработчики для кнопок смены шин
+        Object.entries(this.tyreButtons).forEach(([type, button]) => {
+            if (button) {
+                button.addEventListener('click', () => {
+                    this.changeTyres(type);
+                });
+            }
         });
     }
 
@@ -96,15 +112,41 @@ class RacingGameClient {
             }
         });
 
-
+        // Смена шин через кнопку (старая версия, можно удалить)
         const changeTyres = document.getElementById('change-tyres-btn');
-        changeTyres.addEventListener('click', () =>{
+        if (changeTyres) {
+            changeTyres.addEventListener('click', () =>{
+                this.ws.send(JSON.stringify({
+                    type: 'change-tyres',   // тип сообщения
+                    playerId: this.playerId,
+                    tyresType: 'medium'
+                }));
+            });
+        }
+    }
+    // Смена шин
+    changeTyres(tyreType) {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            console.log(`Changing tyres to: ${tyreType}`);
             this.ws.send(JSON.stringify({
-                type: 'change-tyres',   // тип сообщения
+                type: 'change-tyres',
                 playerId: this.playerId,
-                tyresType: 'tyretype'
+                tyresType: tyreType
             }));
-        });
+
+            // Визуальная обратная связь
+            Object.entries(this.tyreButtons).forEach(([type, button]) => {
+                if (button) {
+                    if (type === tyreType) {
+                        button.style.opacity = '1';
+                        button.style.transform = 'none';
+                    } else {
+                        button.style.opacity = '0.7';
+                        button.style.transform = 'none';
+                    }
+                }
+            });
+        }
     }
 
     // подключение к WebSocket серверу
@@ -302,7 +344,8 @@ class RacingGameClient {
             this.updateHP(player); // обновление таблицы HP
         });
     }
-// Обновление хп
+
+    // Обновление хп
     updateHP(player) {
         const tbody = document.getElementById('hp-table-body');
         if (!tbody) return;
@@ -313,28 +356,77 @@ class RacingGameClient {
             row = document.createElement('tr');
             row.id = `hp-row-${player.id}`;
 
+            // Ячейка с именем и цветом шин
             const nameCell = document.createElement('td');
-            nameCell.textContent = `${player.id}`;
             nameCell.style.padding = '4px';
+            nameCell.style.display = 'flex';
+            nameCell.style.alignItems = 'center';
+            nameCell.style.gap = '8px';
+
+            // Цвет шин
+            const tyreColor = document.createElement('div');
+            tyreColor.style.width = '10px';
+            tyreColor.style.height = '10px';
+            tyreColor.style.borderRadius = '50%';
+            tyreColor.style.backgroundColor = player.tyreStats?.color || '#FFFFFF';
+
+            nameCell.appendChild(tyreColor);
+            nameCell.appendChild(document.createTextNode(player.name || player.id));
             row.appendChild(nameCell);
 
+            // Ячейка с HP баром
             const barCell = document.createElement('td');
             barCell.style.padding = '4px';
+            barCell.colSpan = 2;
+
+            const hpContainer = document.createElement('div');
+            hpContainer.style.cssText = "display: flex; align-items: center; gap: 8px;";
+
+
+            // Контейнер для полосы HP (фиксированная ширина)
+            const hpBarContainer = document.createElement('div');
+            hpBarContainer.id = `hp-bar-container-${player.id}`;
+            hpBarContainer.style.cssText = "flex-grow: 1; height: 12px; background: #34495e; border: 1px solid #888; border-radius: 4px; overflow: hidden; position: relative;";
+            // Сама полоса HP, которая будет уменьшаться
             const hpBar = document.createElement('div');
             hpBar.id = `hp-bar-${player.id}`;
-            hpBar.style.cssText = "width: 100%; height: 12px; background: linear-gradient(to right, #6fcf97, #56ccf2); border: 1px solid #888; border-radius: 4px;";
-            barCell.appendChild(hpBar);
+            hpBar.style.cssText = "position: absolute; top: 0; left: 0; height: 100%; width: 100%; transition: width 0.3s ease;";
+
+            const hpText = document.createElement('span');
+            hpText.id = `hp-text-${player.id}`;
+            hpText.style.cssText = "font-size: 12px; min-width: 60px; text-align: right;";
+
+            hpBarContainer.appendChild(hpBar);
+            hpContainer.appendChild(hpBarContainer);
+            hpContainer.appendChild(hpText);
+            barCell.appendChild(hpContainer);
             row.appendChild(barCell);
 
             tbody.appendChild(row);
         }
 
         const hpBar = document.getElementById(`hp-bar-${player.id}`);
-        if (hpBar && player.hp != null && player.maxHp != null) {
+        const hpText = document.getElementById(`hp-text-${player.id}`);
+
+        if (hpBar && hpText && player.hp != null && player.maxHp != null) {
             const percentage = Math.max(0, Math.min(1, player.hp / player.maxHp)) * 100;
+
+            // Меняем ширину полосы (убывает слева направо)
             hpBar.style.width = percentage + '%';
+
+            // Меняем цвет в зависимости от HP
+            if (percentage > 60) {
+                hpBar.style.background = 'linear-gradient(to right, #6fcf97, #56ccf2)';
+            } else if (percentage > 30) {
+                hpBar.style.background = 'linear-gradient(to right, #f2994a, #f2c94c)';
+            } else {
+                hpBar.style.background = 'linear-gradient(to right, #eb5757, #f2994a)';
+            }
+
+            hpText.textContent = `${player.hp}/${player.maxHp} HP`;
         }
     }
+
     // обновление пользовательского интерфейса (боковая панель)
     updateUI() {
         // получаем массив всех игроков
@@ -343,6 +435,12 @@ class RacingGameClient {
 
         // игровое время
         this.updateGameTimeDisplay();
+
+        // Отображаем текущие шины игрока
+        const currentPlayer = this.gameState.players[this.playerId];
+        if (currentPlayer) {
+            this.updateTyreDisplay(currentPlayer.tyres, currentPlayer.tyreStats);
+        }
 
         const gameStatus = this.gameState['game-status'] || 'playing';
         if (gameStatus === 'finished') {
@@ -362,11 +460,12 @@ class RacingGameClient {
             playerElement.className = 'player-item';
 
             // HTML содержимое элемента игрока:
-            // Цветной квадратик с цветом машины
+            // Цветной квадратик с цветом шин
+            const tyreColor = player.tyreStats?.color || '#FFFFFF';
             playerElement.innerHTML = `
-                        <div class="player-color" style="background-color: white"></div>
-                        Player ${player.id}
-                    `;
+                <div class="player-color" style="background-color: ${tyreColor}"></div>
+                ${player.name}
+            `;
 
             // добавляем элемент в список
             playersList.appendChild(playerElement);
@@ -398,24 +497,68 @@ class RacingGameClient {
             const formattedTime = this.formatTime(bestTime);
 
             row.innerHTML = `
-                 <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
-                     ${index + 1}
-                 </td>
-                 <td style="padding: 8px; border: 1px solid #ddd; text-align: left;">
-                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <div class="player-color" style="width: 12px; height: 12px; border-radius: 50%; background-color: white"></div>
-                         ${player.name}
-                         ${player.id === this.playerId ? '<span style="color: #2196F3;">(Вы)</span>' : ''}
-                     </div>
-                 </td>
-                 <td style="padding: 8px; border: 1px solid #ddd; text-align: center; font-family: monospace;">
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
+                    ${index + 1}
+                </td>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: left;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div class="player-color" style="width: 12px; height: 12px; border-radius: 50%; background-color: ${player.tyreStats?.color || '#FFFFFF'}"></div>
+                        ${player.name}
+                        ${player.id === this.playerId ? '<span style="color: #2196F3;">(Вы)</span>' : ''}
+                    </div>
+                </td>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: center; font-family: monospace;">
                     ${formattedTime}
-                 </td>
-             `;
+                </td>
+            `;
 
             tableBody.appendChild(row);
         });
-        // this.updateDeadStates();
+    }
+
+    // Обновление отображения текущих шин
+    updateTyreDisplay(tyreType, tyreStats) {
+        const tyreDisplay = document.getElementById('current-tyres');
+        if (!tyreDisplay) return;
+
+        if (tyreType && tyreStats) {
+            const color = tyreStats.color || '#FFFFFF';
+            const name = tyreStats.name || tyreType;
+
+            // Рассчитываем характеристики
+            const speedPercent = ((tyreStats.maxSpeedMultiplier || 1) * 100).toFixed(0);
+            const accelPercent = ((tyreStats.accelerationMultiplier || 1) * 100).toFixed(0);
+            const rotationPercent = ((tyreStats.rotationMultiplier || 1) * 100).toFixed(0);
+            const hpBonus = tyreStats.hpBonus || 0;
+            const damageTakenPercent = ((1 - (tyreStats.damageReduction || 0.5)) * 100).toFixed(0);
+            const frictionPercent = ((tyreStats.frictionMultiplier || 1) * 100).toFixed(0);
+
+            tyreDisplay.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <div style="width: 24px; height: 24px; border-radius: 50%; background-color: ${color}; border: 2px solid white;"></div>
+                    <span style="font-weight: bold; font-size: 16px;">${name}</span>
+                </div>
+                <div style="font-size: 12px; line-height: 1.4; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 4px;">
+                    <div style="color: #6fcf97;">🚀 Скорость: <strong>${speedPercent}%</strong></div>
+                    <div style="color: #56ccf2;">⚡ Ускорение: <strong>${accelPercent}%</strong></div>
+                    <div style="color: #f2c94c;">🔄 Поворот: <strong>${rotationPercent}%</strong></div>
+                    <div style="color: #eb5757;">🛡️ Сцепление: <strong>${frictionPercent}%</strong></div>
+                    <div style="color: #bb6bd9;">❤️ Бонус HP: <strong>+${hpBonus}</strong></div>
+                    <div style="color: #6bcf97;">💥 Получаемый урон: <strong>${damageTakenPercent}%</strong></div>
+                </div>
+            `;
+
+            // Обновляем кнопки
+            Object.entries(this.tyreButtons).forEach(([type, button]) => {
+                if (button) {
+                    const isActive = type === tyreType;
+                    button.classList.toggle('active', isActive);
+                    button.style.opacity = isActive ? '1' : '0.7';
+                    button.style.transform = 'none';
+                    button.style.border = isActive ? '2px solid white' : 'none';
+                }
+            });
+        }
     }
 
     formatTime(seconds) {

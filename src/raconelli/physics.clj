@@ -202,9 +202,25 @@
       :else
       [(Math/cos (Math/toRadians (+ angle 180))) (Math/sin (Math/toRadians (+ angle 180)))])))
 
-;; Ограничение скорости
+;; Получение модифицированных значений с учетом шин
+(defn get-tyre-adjusted-values [player]
+  (let [tyre-stats (:tyre-stats player)
+        max-speed-multiplier (:max-speed-multiplier tyre-stats 1.0)
+        acceleration-multiplier (:acceleration-multiplier tyre-stats 1.0)
+        rotation-multiplier (:rotation-multiplier tyre-stats 1.0)
+        friction-multiplier (:friction-multiplier tyre-stats 1.0)]
+
+    {:max-speed (* max-speed max-speed-multiplier)
+     :acceleration (* acceleration acceleration-multiplier)
+     :rotation-speed (* rotation-speed rotation-multiplier)
+     :friction (* friction friction-multiplier)}))
+
+
+;; Ограничение скорости с учетом шин
 (defn limit-speed [player]
-  (let [current-speed (:speed player)
+  (let [adjusted-values (get-tyre-adjusted-values player)
+        max-speed (:max-speed adjusted-values)
+        current-speed (:speed player)
         abs-speed (if (neg? current-speed) (- current-speed) current-speed)
         scale (if (> abs-speed max-speed) (/ max-speed abs-speed) 1)]
     (update player :speed * scale)))
@@ -267,22 +283,27 @@
 (defn update-player-physics [player]
   (let [current-time (System/currentTimeMillis)
         delta-time (max 0.016 (/ (- current-time (:last-update player)) 1000.0))
-        limited-player (limit-speed player)
-        current-speed (:speed limited-player)
-        angle (:angle limited-player)
+        ;; Сначала ограничиваем скорость
+        speed-limited-player (limit-speed player)
+        current-speed (:speed speed-limited-player)
+        angle (:angle speed-limited-player)
         radians (Math/toRadians angle)
         cos-val (Math/cos radians)
         sin-val (Math/sin radians)
-        new-speed (* current-speed friction)
-        new-x (+ (:x limited-player) (* new-speed cos-val delta-time 60))
-        new-y (+ (:y limited-player) (* new-speed sin-val delta-time 60))]
+        ;; Получаем коэффициент трения для текущих шин
+        adjusted-values (get-tyre-adjusted-values speed-limited-player)
+        tyre-friction (:friction adjusted-values)
+        ;; Применяем трение
+        new-speed (* current-speed tyre-friction)
+        new-x (+ (:x speed-limited-player) (* new-speed cos-val delta-time 60))
+        new-y (+ (:y speed-limited-player) (* new-speed sin-val delta-time 60))]
 
     ;; Обрабатываем столкновение
-    (let [player-after-collision (handle-collision limited-player new-x new-y)
+    (let [player-after-collision (handle-collision speed-limited-player new-x new-y)
           player-after-checkpoints (handle-checkpoints player-after-collision new-x new-y)]
 
-      (if (and (= limited-player player-after-collision)
-               (not (:collision-flag player)))
+      (if (and (= speed-limited-player player-after-collision)
+               (not (:collision-flag speed-limited-player)))
         ;; Без столкновений - используем player-after-checkpoints!
         (assoc player-after-checkpoints  ; ← ИЗМЕНИЛОСЬ ЗДЕСЬ
           :x new-x
@@ -296,12 +317,17 @@
 
 ;; Обработка ввода
 (defn handle-player-input [player input]
-  (let [base-player (cond-> player
+  (let [adjusted-values (get-tyre-adjusted-values player)
+        acceleration (:acceleration adjusted-values)
+        rotation-speed (:rotation-speed adjusted-values)
+        tyre-type (:tyres player)
+
+        base-player (cond-> player
+                            ;; Применяем ускорение только если клавиша нажата
                             (:up input) (update :speed + acceleration)
                             (:down input) (update :speed - (* acceleration 0.5))
                             (:left input) (update :angle - rotation-speed)
                             (:right input) (update :angle + rotation-speed))
-
         final-player (if (:collision-flag base-player)
                        (-> base-player
                            (update :speed #(max -2 (min 2 %)))

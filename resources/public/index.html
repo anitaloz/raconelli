@@ -28,11 +28,36 @@
 
     <div>Подключенные игроки: <span id="player-count">0</span></div>
 
-    <div class="player-list" id="players-list"></div>
+    <div class="tyres-section">
+        <h4 style="margin-top: 0; margin-bottom: 10px;">Шины</h4>
 
-    <div>
-        <button id="change-tyres-btn">сменить шины</button>
+        <!-- Отображение текущих шин -->
+        <div id="current-tyres" class="current-tyres">
+            <div style="color: #ccc; text-align: center;">
+                Выберите шины
+            </div>
+        </div>
+
+        <!-- Кнопки выбора шин -->
+        <div class="tyres-buttons">
+            <button id="soft-tyres-btn" class="tyre-btn" title="Быстрые но хрупкие">
+                <div class="tyre-name">Софты</div>
+                <div class="tyre-stats">+Скорость<br>-Прочность</div>
+            </button>
+
+            <button id="medium-tyres-btn" class="tyre-btn" title="Сбалансированные">
+                <div class="tyre-name">Медиумы</div>
+                <div class="tyre-stats">Баланс</div>
+            </button>
+
+            <button id="hard-tyres-btn" class="tyre-btn" title="Прочные но медленные">
+                <div class="tyre-name">Харды</div>
+                <div class="tyre-stats">+Прочность<br>-Скорость</div>
+            </button>
+        </div>
     </div>
+
+    <div class="player-list" id="players-list"></div>
 
     <div>
 

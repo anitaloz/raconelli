@@ -14,6 +14,14 @@
 ;(defn is-id-unique [player-id]
 ;  (not (contains? (game-state/get-players) player-id)))
 
+;; обработчик смены шин
+(defn handle-tyre-change [player-id tyre-type]
+  (println "Player" player-id "changing tyres to" tyre-type)
+  (game-state/update-player!
+    player-id
+    #(players/change-tyres % (keyword tyre-type))))
+
+
 ;; создание WebSocket обработчика
 (defn create-websocket-handler []
   ;; возвращаем функцию-обработчик для HTTP запросов
@@ -84,9 +92,15 @@
                                                       "player-input" ;; ввод игрока
                                                       (handle-player-input (:playerId message) (:input message))
 
-                                                      "change-tyres" ;; смена шин
-                                                      (println "TODO: смена шин"
-                                                        )
+                                                      "change-tyres"
+                                                      (let [pid (:playerId message)
+                                                            tyre-type (:tyresType message)]
+                                                        (handle-tyre-change pid tyre-type)
+                                                        (server/send! channel (json/write-str
+                                                                                {:type "tyres-changed"
+                                                                                 :message (str "Tyres changed to " tyre-type)
+                                                                                 :tyresType tyre-type})))
+
 
                                                       "change-car" ;; смена машины
                                                       (let [pid (:playerId message)
