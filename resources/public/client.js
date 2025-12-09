@@ -155,7 +155,9 @@ class RacingGameClient {
         // определяем протокол (ws:// или wss://) в зависимости от текущего протокола страницы
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         // формируем URL WebSocket соединения
+
         const wsUrl = `${protocol}//${window.location.host}/ws`;
+        console.log("URL:", wsUrl);
         // новое WebSocket соединение
         this.ws = new WebSocket(wsUrl);
 
@@ -233,7 +235,7 @@ class RacingGameClient {
             const player = this.gameState.players[this.playerId];
 
             if (player.hp !== 0) {
-                console.log("player hp: ", player.hp);
+                // console.log("player hp: ", player.hp);
                 const input = {
                     up: this.keys['w'] || false,
                     down: this.keys['s'] || false,
@@ -338,7 +340,7 @@ class RacingGameClient {
         Object.values(this.gameState.players).forEach(player => {
             // player.maxHp = player.maxHp || 100;
             // player.hp = 100;
-            console.log("Drawing player:", player.id, "HP:", player.hp);
+            // console.log("Drawing player:", player.id, "HP:", player.hp);
             this.drawCarWithImage(this.ctx, player);
             //this.checkBoundaries(this.ctx, player)
             this.updateHP(player); // обновление таблицы HP
