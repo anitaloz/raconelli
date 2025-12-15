@@ -7,7 +7,7 @@
         :game-time 0       ; игровое время в секундах
         :game-status :playing       ; :playing :finished :restarting
         :winner nil        ;победитель по окончании игры
-        :game-duration 60  ; длительность игры в секундах (1 минута)
+        :game-duration 500  ; длительность игры в секундах (1 минута)
         :reatart-timer 0;таймер рестарта в секундах
         ;:hp 100
         }))

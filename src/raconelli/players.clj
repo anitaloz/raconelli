@@ -62,7 +62,7 @@
    :best-time 0
    :last-finish-time 0
    :last-checkpoint -1
-   :tyres :medium
+   :tyres :hard
    :tyre-stats (get-tyre-stats :medium) ; Характеристики шин
    })  ; Добавляем отслеживание последнего обработанного чекпоинта; добавили начальный чекпоинт
 

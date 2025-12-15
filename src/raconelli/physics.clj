@@ -3,7 +3,7 @@
             [raconelli.game-state :as game-state]))
 
 ;; Константы физики
-(def max-speed 5)
+(def max-speed 2)
 (def acceleration 0.4)
 (def friction 0.988)
 (def rotation-speed 5)

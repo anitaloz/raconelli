@@ -7,7 +7,7 @@
 
 ;; обработчик ввода игрока
 (defn handle-player-input [player-id input-data]
-  ;(println "Handling input for player" player-id ":" input-data)
+  (println "Handling input for player" player-id ":" input-data)
   (game-state/update-player! player-id #(physics/handle-player-input % input-data)))
 
 ;; проверка уникальности ID
@@ -53,6 +53,11 @@
                                                 (try
                                                   ;; парсим JSON сообщение
                                                   (let [message (json/read-str data :key-fn keyword)]
+
+                                                    (println "Received player-input message:" message)
+                                                    (println "playerId =" (:playerId message) "input =" (:input message))
+
+
                                                     ;; обрабатываем в зависимости от типа сообщения
                                                     (case (:type message)
 
@@ -88,6 +93,7 @@
                                                        ;;; добавление игрока
                                                        ;(game-state/add-player! client-id channel)
                                                       )
+
 
                                                       "player-input" ;; ввод игрока
                                                       (handle-player-input (:playerId message) (:input message))
