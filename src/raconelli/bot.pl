@@ -8,44 +8,22 @@
 % =========================================================
 
 trajectory([
-    point(665, 118),   % первая точка
-    %point(693, 148),   % далее по списку
-    point(693, 222),
-    point(673, 237),
-    point(492, 273),
-    point(469, 252),
-    point(469, 339),
-    point(492, 355),
-    point(669, 355),
-    point(696, 378),
-    point(696, 466),
-    point(668, 486),
-    point(444, 486),
-    point(404, 477),
-    point(374, 457),
-    point(356, 424),
-    point(347, 379),
-    point(347, 314),
-    point(330, 273),
-    point(308, 248),
-    point(271, 244),
-    point(241, 258),
-    point(224, 286),
-    point(216, 318),
-    point(216, 414),
-    point(205, 445),
-    point(182, 468),
-    point(151, 479),
-    point(120, 471),
-    point(95, 448),
-    point(88, 416),
-    point(89, 383),
-    point(101, 346),
-    point(107, 311),
-    point(107, 219),
-    point(114, 175),
-    point(147, 128),
-    point(179, 118)    % последняя точка
+    point(685, 120),
+    point(685, 236),
+    point(463,236),
+    point(463, 360),
+    point(685, 365),
+    point(695, 495),
+    point(355, 485),
+    point(355, 330),
+    point(280, 234),
+    point(220, 330),
+    point(220, 420),
+    point(150, 487),
+    point(83, 415),
+    point(110, 286),
+    point(179, 118),
+    point(420, 100)
 ]).
 
 % =========================================================
@@ -181,17 +159,22 @@ step_bot(WS, PlayerId, [Point|Rest], State, NewTrajectory) :-
 loop(WS, PlayerId, Trajectory) :-
     listen_state(WS, PlayerId, State),
     (   State == join_success
-    ->  format("Join success, initializing position seed...~n"),
+    ->  format("Join success~n"),
+        sleep(0.012),
         loop(WS, PlayerId, Trajectory)
+
     ;   State == join_error
     ->  format("Join error, stopping.~n")
+
     ;   State == none
-    ->  sleep(0.016),  % ждём ~16 мс
+    ->  sleep(0.012),
         loop(WS, PlayerId, Trajectory)
+
     ;   step_bot(WS, PlayerId, Trajectory, State, NextTrajectory),
-        sleep(0.016),
+        sleep(0.012),  % всегда пауза!
         loop(WS, PlayerId, NextTrajectory)
     ).
+
 
 % =========================================================
 % ЗАПУСК — подключение и старт бота
