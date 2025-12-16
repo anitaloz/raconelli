@@ -1,5 +1,5 @@
 (ns raconelli.players)
-(def car-types ["zauber" "mercedes" "ferrari" "red_bull", "pickme"])
+(def car-types ["zauber" "mercedes" "ferrari" "red_bull", "pickme", "purple", "skull_car"])
 ;; Константы шин
 (def tyre-types {
                  :soft {
