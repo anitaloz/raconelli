@@ -115,6 +115,8 @@
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
 }
 
+
+
 /* ====== Общее ====== */
 body {
     margin: 0;
@@ -130,127 +132,232 @@ body {
 
 /* ====== Панель с информацией ====== */
 #info-panel {
-    background: #34495e;
+    background: #E3F2FD;
+    color: #4472ca;
     padding: 15px;
     border-radius: 15px;
+    margin-top: 10px;
     margin-bottom: 10px;
     width: 820px;
-    height: 620px;
+    min-height: 620px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(52, 73, 94, 0.1),
+    inset 0 2px 4px rgba(255, 255, 255, 0.1);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto 1fr auto;
+    gap: 25px;
+    grid-template-areas:
+        "header header"
+        "status stats"
+        "tyres leaderboard"
+        "players players";
 }
 
 
+
+/* ====== Заголовок (Гоночки) ======*/
+#info-panel h3 {
+    grid-area: header;
+    margin: 0 0 10px 0;
+    font-size: 32px;
+    color: #4472ca;
+    text-align: center;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(22, 96, 136, 0.2);
+}
+
+
+
+/* ====== Секция подключения и времени ====== */
+#info-panel > div:nth-child(2),
+#info-panel > div:nth-child(3),
+#info-panel > div:nth-child(4) {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(22, 96, 136, 0.1);
+}
+
+#connection-status {
+    font-weight: bold;
+    color: #E23D28 !important;
+}
+
+#connection-status.connected {
+    color: #4CAF50 !important;
+}
+
+
+
+/* ====== Время игры ====== */
+#game-time {
+    font-size: 18px;
+    color: #4472ca !important;
+    font-weight: bold !important;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#time-display {
+    color: #E23D28 !important;
+    font-size: 20px;
+}
+
+
+
+/* ====== Подключенные игроки ====== */
+#player-count {
+    font-weight: bold;
+    color: #E23D28 !important;
+    font-size: 18px;
+}
+
+/* ====== Список игроков ====== */
 .player-list {
+    grid-area: players;
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(22, 96, 136, 0.1);
+    margin-top: 0;
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    margin-top: 10px;
+    align-items: center;
 }
 
 .player-item {
-    background: #2c3e50;
-    padding: 5px 10px;
-    border-radius: 3px;
+    background: rgba(22, 96, 136, 0.1);
+    padding: 8px 15px;
+    border-radius: 20px;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
+    font-size: 14px;
+    color: #166088;
+    border: 1px solid rgba(22, 96, 136, 0.2);
 }
 
 .player-color {
-    width: 15px;
-    height: 15px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 
 
-/* Players Table Styles */
+/* ====== Кнопка смены машины  ======*/
+#change-car-btn {
+    background: linear-gradient(135deg, #64B5F6 0%, #5e7ce2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 18px;
+    margin-top: 10px;
+}
+
+#change-car-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.7s ease;
+}
+
+#change-car-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+}
+
+#change-car-btn:hover::before {
+    left: 100%;
+}
+
+#change-car-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+}
+
+
+/* ====== Таблица лидеров ====== */
 .players-table-container {
-    margin: 20px 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    grid-area: leaderboard;
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(22, 96, 136, 0.1);
 }
 
 .players-table-title {
-    color: #e0e0e0;
-    margin-bottom: 15px;
-    font-weight: 500;
-    border-bottom: 2px solid #333;
-    padding-bottom: 8px;
-    font-size: 1.3em;
+    color: #4472ca;
+    margin: 0 0 15px 0;
+    font-weight: 600;
+    font-size: 18px;
+    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(22, 96, 136, 0.2);
 }
 
 .players-table {
     width: 100%;
-    border-collapse: collapse;
-    background: #1a1a1a;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #4472ca;
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
     font-size: 14px;
 }
 
-.players-table thead {
-    background: linear-gradient(135deg, #2d2d2d, #404040);
-}
-
 .players-table th {
-    padding: 16px 12px;
+    padding: 12px;
     text-align: center;
-    color: #ffffff;
+    color: white;
     font-weight: 600;
-    border-bottom: 2px solid #555;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-size: 0.9em;
-}
-
-.players-table th:first-child {
-    width: 60px;
-}
-
-.players-table th:last-child {
-    width: 120px;
+    border-bottom: 2px solid rgba(22, 96, 136, 0.2);
+    font-size: 13px;
 }
 
 .players-table tbody tr {
-    background: #252525;
-    transition: all 0.3s ease;
-    border-bottom: 1px solid #333;
+    background: white;
+    transition: all 0.2s ease;
 }
 
 .players-table tbody tr:nth-child(even) {
-    background: #2a2a2a;
+    background: rgba(22, 96, 136, 0.03);
 }
 
 .players-table tbody tr:hover {
-    background: #333;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    background: rgba(22, 96, 136, 0.08);
 }
 
 .players-table td {
-    padding: 14px 12px;
-    color: #e0e0e0;
-    border-bottom: 1px solid #333;
-    transition: color 0.3s ease;
-}
-
-.players-table td:first-child {
+    padding: 10px 12px;
+    background-color: #E3F2FD;
     text-align: center;
-    font-weight: 600;
-    color: #bbbbbb;
+    border-bottom: 1px solid rgba(22, 96, 136, 0.1);
 }
 
-.players-table td:nth-child(2) {
-    text-align: left;
-    font-weight: 500;
+.current-player {
+    background: #50C878 !important;
+    border-left: 3px solid #2196F3;
 }
 
-.players-table td:last-child {
-    text-align: center;
-    font-weight: 600;
-}
 
-/* Position badges */
+
+/* ====== Цвета для отображения позиций ====== */
 .position-1 {
     color: #FFD700 !important;
     font-size: 1.1em;
@@ -264,7 +371,9 @@ body {
     color: #CD7F32 !important;
 }
 
-/* Time colors */
+
+
+/* ====== Цвета для отображения времени круга ====== */
 .best-time {
     color: #4CAF50 !important;
     font-weight: 700;
@@ -287,7 +396,9 @@ body {
     font-style: italic;
 }
 
-/* Current player highlight */
+
+
+/* ====== Статистика текущего игрока ====== */
 .current-player {
     background: linear-gradient(135deg, #3a3a3a, #4a4a4a) !important;
     border-left: 4px solid #2196F3;
@@ -302,7 +413,9 @@ body {
     font-size: 0.8em;
 }
 
-/* Animations */
+
+
+/* ====== Анимации ====== */
 @keyframes highlightUpdate {
     0% { background: #4a4a4a; }
     50% { background: #5a5a5a; }
@@ -313,7 +426,6 @@ body {
     animation: highlightUpdate 0.8s ease-in-out;
 }
 
-/* Empty state */
 .players-table-empty {
     text-align: center;
     color: #757575;
@@ -323,63 +435,91 @@ body {
 
 
 
+/* ====== Типы шин ====== */
 .tyres-section {
-    margin: 15px 0;
-    padding: 10px;
-    background: #2c3e50;
-    border-radius: 5px;
+    grid-area: tyres;
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(22, 96, 136, 0.1);
+}
+
+.tyres-section h3 {
+    color: #4472ca;
+    margin: 0 0 15px 0;
+    font-weight: 600;
+    font-size: 18px;
+    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(22, 96, 136, 0.2);
 }
 
 .current-tyres {
-    margin-bottom: 10px;
-    padding: 8px;
-    background: #34495e;
-    border-radius: 3px;
-    font-size: 14px;
+    background: rgba(22, 96, 136, 0.05);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+    border: 1px dashed rgba(22, 96, 136, 0.2);
+    color: #166088;
 }
 
 .tyres-buttons {
     display: flex;
-    gap: 8px;
-    margin-bottom: 10px;
+    gap: 10px;
+    flex-direction: column;
 }
 
 .tyre-btn {
-    flex: 1;
-    padding: 8px;
+    padding: 12px;
     border: none;
-    border-radius: 4px;
+    border-radius: 10px;
     color: white;
     font-weight: bold;
     cursor: pointer;
     text-align: center;
-    font-size: 12px;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 80px;
 }
 
+.tyre-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.tyre-btn:active {
+    transform: translateY(0);
+}
 
 #soft-tyres-btn {
-    background: #FF6B6B;
+    background: linear-gradient(135deg, #E23D28 0%, #C12C1A 100%);
 }
 
 #medium-tyres-btn {
-    background: #f0f58a;
+    background: linear-gradient(135deg, #FCF75E 0%, #F4E74E 100%);
 }
 
 #hard-tyres-btn {
-    background: #ffffff;
-}
-
-.tyre-stats {
-    font-size: 11px;
-    color: #454545;
-    line-height: 1.3;
+    background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
 }
 
 .tyre-name {
     font-weight: bold;
-    font-size: 13px;
-    margin-bottom: 3px;
-    color: black;
+    font-size: 16px;
+    margin-bottom: 5px;
+    color: #000;
+}
+
+.tyre-stats {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.7);
+    line-height: 1.3;
+    text-align: center;
 }
 
 
@@ -397,18 +537,19 @@ body {
 
 .hp-table th, .hp-table td {
     padding: 4px;
-    border: 1px solid #34495e;
+    border: 1px solid #4472ca !important;
+    background-color: #4472ca !important;
 }
 
 .hp-table th {
-    background: #2c3e50;
+    background: #4472ca !important;
     text-align: left;
 }
 
 .hp-bar-container {
     width: 100%;
     height: 12px;
-    background: #34495e;
+    background: #4472ca !important;
     border-radius: 2px;
     overflow: hidden;
 }
@@ -421,6 +562,8 @@ body {
 #hp-bar-container-1{
     width: 20px;
 }
+
+
 
 /* ====== Гоночный трек ====== */
 #game-container {
@@ -441,6 +584,8 @@ body {
 #game-canvas {
     border: 2px solid;
 }
+
+
 
 /* ====== Инструкция по управлению ====== */
 #controls {
@@ -481,6 +626,8 @@ body {
     min-width: 24px;
     text-align: center;
 }
+
+
 
 /* ====== Уведомления и их анимации ====== */
 @keyframes slideIn {
