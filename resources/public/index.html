@@ -23,23 +23,19 @@
 
     <div id="info-panel">
         <h3>Гоночки</h3>
-        <div>Connected: <span id="connection-status">Disconnected</span></div>
+        <div style="font-size: 18px; font-weight: bold;">Подключение: <span id="connection-status">Disconnected</span></div>
 
-        <div id="game-time" style="margin: 10px 0; font-size: 16px; font-weight: bold;">
+        <div id="game-time" style="font-weight: bold;">
             Время игры: <span id="time-display">00:00</span>
         </div>
 
-        <div>Подключенные игроки: <span id="player-count">0</span></div>
+        <div style="font-size: 18px; font-weight: bold;">Подключенные игроки: <span id="player-count">0</span></div>
 
         <div class="tyres-section">
-            <h4 style="margin-top: 0; margin-bottom: 10px;">Шины</h4>
+            <h3 style="margin-top: 0; margin-bottom: 10px;">Шины</h3>
 
             <!-- Отображение текущих шин -->
-            <div id="current-tyres" class="current-tyres">
-                <div style="color: #ccc; text-align: center;">
-                    Выберите шины
-                </div>
-            </div>
+            <div id="current-tyres" class="current-tyres" style="font-weight: bold;"> Выберите шины </div>
 
             <!-- Кнопки выбора шин -->
             <div class="tyres-buttons">
@@ -63,11 +59,11 @@
         <div class="player-list" id="players-list"></div>
 
         <div>
-            <button id="change-car-btn">сменить машину</button>
+            <button id="change-car-btn">Сменить машину</button>
         </div>
 
         <div class="players-table-container">
-            <h3 class="players-table-title">🏁 Таблица лидеров</h3>
+            <h3 class="players-table-title">Таблица лидеров</h3>
             <table class="players-table">
                 <thead>
                 <tr>
@@ -77,27 +73,7 @@
                 </tr>
                 </thead>
                 <tbody id="players-table-body">
-                <!-- Example rows (will be populated dynamically) -->
-                <tr class="current-player">
-                    <td class="position-1">1</td>
-                    <td>Гонщик Про</td>
-                    <td class="best-time">1:23.456</td>
-                </tr>
-                <tr>
-                    <td class="position-2">2</td>
-                    <td>Скоростной</td>
-                    <td class="good-time">1:25.123</td>
-                </tr>
-                <tr>
-                    <td class="position-3">3</td>
-                    <td>Новичок</td>
-                    <td class="average-time">1:30.789</td>
-                </tr>
-                <tr>
-                    <td>4</td>
-                    <td>Тестовый игрок</td>
-                    <td class="no-time">-</td>
-                </tr>
+                    <!-- Динамически добавляем строки -->
                 </tbody>
             </table>
         </div>
@@ -106,7 +82,7 @@
         <div id="player-info" style="color: #ff4444; font-weight: bold; margin-bottom: 10px;"></div>
         <!-- Отображение здоровья игроков -->
         <div id="hp-table-container">
-            <table id="hp-table" style="border-collapse: collapse; width: 200px; color: #fff; font-family: sans-serif;">
+            <table id="hp-table" style="border-collapse: collapse; width: 200px; color: #4472ca;">
                 <thead>
                 <tr>
                     <th style="text-align: left; padding: 4px;">Player</th>
@@ -114,7 +90,7 @@
                 </tr>
                 </thead>
                 <tbody id="hp-table-body">
-                <!-- Динамически добавляем строки -->
+                    <!-- Динамически добавляем строки -->
                 </tbody>
             </table>
         </div>
