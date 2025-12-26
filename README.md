@@ -1,10 +1,11 @@
 # raconelli
 
-A Clojure library designed to ... well, that part is up to you.
+Многопользовательская игра "Гонки"
 
+Запуск через REPL:
 (require 'raconelli.server)
 (raconelli.server/-main)
 
-
+Запуск бота в консоли
 swipl -s 'path' 
 start_bot.
